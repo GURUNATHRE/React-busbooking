@@ -4,10 +4,9 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 const baseurl = import.meta.env.VITE_API_BASE_URL;
-
 function Registration() {
 
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit ,formState: { errors }} = useForm();
     const navigate = useNavigate();
 
     const onSubmit = async (formData) => {
@@ -17,8 +16,6 @@ function Registration() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
-
-            const data = await response.json();
 
             window.alert("Registration completed");
             navigate(`/`);
@@ -41,7 +38,9 @@ function Registration() {
             icon.classList.replace("fa-eye-slash", "fa-eye");
         }
     };
-
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return (
         <div className="registration-container">
             <div className="container-fluid">
@@ -76,9 +75,18 @@ function Registration() {
                                         type="text"
                                         className="form-control shadow-sm border-0 bg-light"
                                         placeholder="Username"
-                                        {...register("username")}
+                                        {...register("username",{
+                                            required :" username is required ",
+                                            pattern:{
+                                                value : usernameRegex,
+                                                message : "username should have capital letters as well "
+                                            }
+                                        })}
                                     />
                                     <label>User Name</label>
+                                    {errors.username && (
+                                        <p className="text-danger small mt-1">{errors.username.message}</p>
+                                    )}
                                 </div>
 
                                 <div className="form-floating mb-3">
@@ -86,9 +94,18 @@ function Registration() {
                                         type="email"
                                         className="form-control shadow-sm border-0 bg-light"
                                         placeholder="Email"
-                                        {...register("email", { required: true })}
+                                        {...register("email", {
+                                            required: "email is required",
+                                            pattern: {
+                                                value: emailRegex,
+                                                message: " email must be 8+ chars, with upper, lower, number & symbol"
+                                            }
+                                        })}
                                     />
                                     <label>Email Address</label>
+                                    {errors.email && (
+                                        <p className="text-danger small mt-1">{errors.email.message}</p>
+                                    )}
                                 </div>
 
                                 <div className="form-floating mb-3 position-relative">
@@ -96,7 +113,13 @@ function Registration() {
                                         type="password"
                                         className="form-control shadow-sm border-0 bg-light"
                                         placeholder="Password"
-                                        {...register("password", { required: true })}
+                                        {...register("password", {
+                                            required: "password is required",
+                                            pattern: {
+                                                value: passwordRegex,
+                                                message: "Password must be 8+ chars, with upper, lower, number & symbol"
+                                            }
+                                        })}
                                     />
 
                                     <div className="position-absolute top-0 end-0 py-3 px-3 eye-css">
@@ -104,6 +127,9 @@ function Registration() {
                                     </div>
 
                                     <label>Password</label>
+                                    {errors.password && (
+                                        <p className="text-danger small mt-1">{errors.password.message}</p>
+                                    )}
                                 </div>
 
                                 <button
