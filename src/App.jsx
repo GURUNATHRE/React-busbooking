@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Businput from './components/Businput';
 import Buses from './components/Buses';
-import Seats from './components/seats';
+import Seats from './components/Seats';
 import Mybookings from './components/Mybookings'
 // import Resetpass from './components/Resetpass';
 // import Profile from './components/Profile';

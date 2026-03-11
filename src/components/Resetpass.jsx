@@ -28,11 +28,9 @@ function ResetPass() {
     setLoading(true);
 
     try {
-      // 1️⃣ Fetch all users
       const usersResponse = await fetch("http://127.0.0.1:8000/list/users/");
       const usersData = await usersResponse.json();
 
-      // 2️⃣ Find user ID by email
       const user = usersData.find((u) => u.email === email);
       if (!user) {
         setMessage({ type: "error", text: "Email address not found" });
@@ -40,7 +38,6 @@ function ResetPass() {
         return;
       }
 
-      // 3️⃣ Send PATCH request to update password
       const patchResponse = await fetch(
         `http://127.0.0.1:8000/list/users/${user.id}/`,
         {

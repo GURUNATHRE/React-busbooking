@@ -3,55 +3,73 @@ import "../css/Buses.css";
 import Navbar from "./Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import FiltersContent from "./FiltersContent";
+import axios from "axios";
 
 function Buses() {
+
   const location = useLocation();
   const navigate = useNavigate();
   const { filteredBuses } = location.state || {};
 
-  // Raw bus data from API
+  // Raw bus data
   const [allBuses, setAllBuses] = useState([]);
-  // Filtered buses to display
+
+  // Displayed buses
   const [filteredBusesList, setFilteredBusesList] = useState([]);
-  // Filters from FiltersContent
+
+  // Filters
   const [filters, setFilters] = useState({
     minPrice: "",
     maxPrice: "",
     busTypes: [],
     startTime: ""
   });
-  // Search text
+
+  // Search
   const [searchText, setSearchText] = useState("");
-  const token = localStorage.getItem("access")
-  // Fetch buses once
+
+  const token = localStorage.getItem("access");
+
+  // Fetch buses
   useEffect(() => {
+
     const fetchBuses = async () => {
       try {
+
         let data = [];
+
         if (filteredBuses && filteredBuses.length > 0) {
           data = filteredBuses;
-        } else {
-          const response = await fetch("http://127.0.0.1:8000/list/buses/",{
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Token ${token}`
-                    }
-                });
-          data = await response.json();
+        } 
+        else {
+          const response = await axios.get(`buses/`,{
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Token ${token}`
+              }
+            }
+          );
+
+          data = response.data;
         }
+
         setAllBuses(data);
         setFilteredBusesList(data);
+
       } catch (error) {
         console.error("Error fetching buses:", error);
       }
     };
 
     fetchBuses();
-  }, [filteredBuses]);
+
+  }, [filteredBuses, token]);
+
+
 
   // Apply filters and search
   useEffect(() => {
+
     let updatedList = [...allBuses];
 
     // Price filter
@@ -60,6 +78,7 @@ function Buses() {
         (bus) => Number(bus.price) >= Number(filters.minPrice)
       );
     }
+
     if (filters.maxPrice) {
       updatedList = updatedList.filter(
         (bus) => Number(bus.price) <= Number(filters.maxPrice)
@@ -90,31 +109,43 @@ function Buses() {
     }
 
     setFilteredBusesList(updatedList);
+
   }, [allBuses, filters, searchText]);
+
+
 
   const handleseats = (id) => {
     navigate(`/bus/${id}/seats`);
   };
 
+
+
   const handleFilters = (data) => {
     setFilters(data);
   };
 
+
+
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
+
+
 
   return (
     <>
       <Navbar />
 
       <div className="bus-page">
+
         <div className="container py-5">
+
           <h2 className="text-center text-white fw-bold mt-5 mb-4">
             {filteredBuses ? "Available Buses" : "All Buses"}
           </h2>
 
           <div className="row">
+
 
             {/* Desktop Filters */}
             <div className="col-lg-3 d-none d-lg-block">
@@ -126,7 +157,8 @@ function Buses() {
             {/* Bus List */}
             <div className="col-lg-9">
 
-              {/* Mobile Filters Button */}
+
+              {/* Mobile Filter Button */}
               <div className="d-lg-none mb-3">
                 <button
                   className="btn btn-dark w-100"
@@ -137,7 +169,8 @@ function Buses() {
                 </button>
               </div>
 
-              {/* Search Input */}
+
+              {/* Search */}
               <form className="d-flex mb-4">
                 <input
                   className="form-control me-2"
@@ -148,12 +181,19 @@ function Buses() {
                 />
               </form>
 
+
+
               {/* Bus Cards */}
               {filteredBusesList.length > 0 ? (
+
                 filteredBusesList.map((bus) => (
+
                   <div key={bus.id} className="card mb-4 shadow-sm">
+
                     <div className="card-body p-4">
+
                       <div className="row align-items-center gy-3">
+
 
                         {/* Left */}
                         <div className="col-md-3">
@@ -161,60 +201,88 @@ function Buses() {
                           <p className="text-muted small mb-2">{bus.features}</p>
                         </div>
 
+
                         {/* Center */}
                         <div className="col-md-5">
                           <div className="row text-center align-items-center">
+
                             <div className="col-5 text-start">
                               <div>{bus.start_time}</div>
                               <small>From: {bus.starting_point}</small>
                             </div>
+
                             <div className="col-2">→</div>
+
                             <div className="col-5 text-end">
                               <div>{bus.reach_time}</div>
                               <small>To: {bus.ending_points}</small>
                             </div>
+
                           </div>
                         </div>
+
 
                         {/* Right */}
                         <div className="col-md-4 text-end border-start">
                           <div className="text-muted small">Starts from</div>
                           <div className="fs-4 fw-bold">₹{bus.price}</div>
+
                           <button
                             className="btn btn-primary mt-2"
                             onClick={() => handleseats(bus.id)}
                           >
                             VIEW SEATS
                           </button>
+
                         </div>
 
+
                       </div>
+
                     </div>
+
                   </div>
+
                 ))
+
               ) : (
+
                 <p className="text-white text-center">No buses found.</p>
+
               )}
 
             </div>
+
           </div>
+
         </div>
+
       </div>
 
-      {/* Mobile Filters Offcanvas */}
+
+
+      {/* Mobile Filters */}
       <div
         className="offcanvas offcanvas-start"
         tabIndex="-1"
         id="mobileFilters"
       >
+
         <div className="offcanvas-header">
           <h5 className="offcanvas-title">Filters</h5>
-          <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+          ></button>
         </div>
+
         <div className="offcanvas-body">
           <FiltersContent onApplyFilters={handleFilters} />
         </div>
+
       </div>
+
     </>
   );
 }

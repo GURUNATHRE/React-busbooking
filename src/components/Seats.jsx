@@ -17,7 +17,7 @@ function Seats() {
   useEffect(() => {
     const fetchbus = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/list/buses/${id}`);
+        const response = await axios.get(`buses/${id}`);
         setbus(response.data)
       } catch (error) {
         console.error("Error fetching seats:", error);
@@ -29,14 +29,8 @@ function Seats() {
   useEffect(() => {
     const fetchSeats = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/list/bus/${id}/seats/`, {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await axios.get(`bus/${id}/seats/`, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
         setSeats(res.data.seats);
-        const fetceddata = res.data
       } catch (error) {
         console.error("Error fetching seats:", error);
       }
@@ -64,18 +58,7 @@ function Seats() {
     }
 
     try {
-      const res = await axios.post(
-        `http://127.0.0.1:8000/list/Bookingview/`,
-        {
-          seat: selectedSeat,
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.post(`Bookingview/`, { seat: selectedSeat, }, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
 
       alert("Seat booked successfully!");
       const details = res.data
@@ -83,14 +66,7 @@ function Seats() {
 
 
       // Refresh seats after booking
-      const refreshed = await axios.get(
-        `http://127.0.0.1:8000/list/bus/${id}/seats/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-      );
+      const refreshed = await axios.get(`/bus/${id}/seats/`, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
       setSeats(refreshed.data.seats);
       setSelectedSeat(null);
 
