@@ -8,7 +8,12 @@ function Login() {
   const navigate = useNavigate();
 
   // useForm hook
-  const {register,handleSubmit,formState: { errors },} = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError, // <-- add setError
+  } = useForm();
 
   const onSubmit = async (data) => {
     try {
@@ -20,14 +25,20 @@ function Login() {
       if (res.status === 200) {
         // store token
         localStorage.setItem("access", res.data.token);
-        console.log("Token:", res.data.token); // show token in console
-
         // redirect after login
         navigate("/businput");
       }
     } catch (error) {
       if (error.response) {
-        alert(error.response.data.error || "Login failed");
+        // If invalid credentials, show below password field
+        if (error.response.data.error === "Invalid credentials") {
+          setError("password", {
+            type: "manual",
+            message: "Invalid credentials",
+          });
+        } else {
+          alert(error.response.data.error || "Login failed");
+        }
       } else {
         alert("Server error");
       }
@@ -59,20 +70,6 @@ function Login() {
           <div className="px-5">
             <h1 className="display-3 fw-bold mb-4">Welcome, Start Your Journey</h1>
             <p className="lead">Join over 10 million happy travelers across India.</p>
-            <div className="mt-5 d-flex justify-content-center gap-4">
-              <div>
-                <i className="fa-solid fa-shield-halved fa-2x mb-2"></i>
-                <p>Verified Buses</p>
-              </div>
-              <div>
-                <i className="fa-solid fa-headset fa-2x mb-2"></i>
-                <p>24/7 Support</p>
-              </div>
-              <div>
-                <i className="fa-solid fa-bolt fa-2x mb-2"></i>
-                <p>Instant Refund</p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -127,41 +124,43 @@ function Login() {
                   <input className="form-check-input" type="checkbox" />
                   <label className="form-check-label text-muted">Remember me</label>
                 </div>
-                <a href="#" className="text-decoration-none text-brand fw-bold">Forgot Password?</a>
+                <Link to="/editpass" className="text-decoration-none text-brand fw-bold">
+                  Forgot Password?
+                </Link>
               </div>
 
               <button type="submit" className="btn btn-brand w-100 py-3 fw-bold shadow">
                 LOGIN <i className="fa-solid fa-arrow-right-to-bracket ms-2"></i>
               </button>
-
-              <div className="text-center my-4">
-                <span className="text-muted small">OR</span>
-                <hr />
-              </div>
-
-              <button
-                type="button"
-                onClick={googleLogin}
-                className="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2"
-              >
-                <i className="fa-brands fa-google m-2"></i> Continue with Google
-              </button>
-
-              <div className="text-center mt-5">
-                <p className="text-muted small">
-                  New to BusTicket?
-                  <Link to="/Registration" className="text-brand fw-bold text-decoration-none ms-1">
-                    Create an account
-                  </Link>
-                </p>
-                <p className="text-muted small">
-                  Reset Password ?
-                  <Link to="/editpass" className="text-brand fw-bold text-decoration-none ms-1">
-                    Reset
-                  </Link>
-                </p>
-              </div>
             </form>
+
+            <div className="text-center my-4">
+              <span className="text-muted small">OR</span>
+              <hr />
+            </div>
+
+            <button
+              type="button"
+              onClick={googleLogin}
+              className="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2"
+            >
+              <i className="fa-brands fa-google m-2"></i> Continue with Google
+            </button>
+
+            <div className="text-center mt-5">
+              <p className="text-muted small">
+                New to BusTicket?
+                <Link to="/Registration" className="text-brand fw-bold text-decoration-none ms-1">
+                  Create an account
+                </Link>
+              </p>
+              <p className="text-muted small">
+                Reset Password?
+                <Link to="/editpass" className="text-brand fw-bold text-decoration-none ms-1">
+                  Reset
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

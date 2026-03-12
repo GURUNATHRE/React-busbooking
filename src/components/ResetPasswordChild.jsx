@@ -105,10 +105,10 @@ function ResetPasswordChild({ email }) {
           <Button
             variant="contained"
             fullWidth
-            disabled={loading}
+            
             onClick={handleNavigate} // navigate on click
           >
-            {loading ? <CircularProgress size={24} /> : "Go to Login"}
+            login
           </Button>
         </Box>
       </form>
