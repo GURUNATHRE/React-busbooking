@@ -154,6 +154,12 @@ function Login() {
                     Create an account
                   </Link>
                 </p>
+                <p className="text-muted small">
+                  Reset Password ?
+                  <Link to="/editpass" className="text-brand fw-bold text-decoration-none ms-1">
+                    Reset
+                  </Link>
+                </p>
               </div>
             </form>
           </div>
