@@ -22,7 +22,7 @@ function ResetPassParent() {
     setLoading(true);
     try {
       // Validate email via backend
-      const res = await axios.post("http://127.0.0.1:8000/list/checkemail/", { email });
+      const res = await axios.post("checkemail/", { email });
 
       if (res.data.status === "success") {
         setSubmittedEmail(email); // Pass email to child component

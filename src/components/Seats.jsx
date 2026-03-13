@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../css/Seats.css";
 import { useParams, useLocation, useNavigation, data } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 
 function Seats() {
   const { id } = useParams();
 
   const [seats, setSeats] = useState([]);
+  const socketRef = useRef(null);
   const [selectedSeat, setSelectedSeat] = useState([]);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [bus, setbus] = useState("")
 
   const token = localStorage.getItem("access");
@@ -35,8 +36,8 @@ function Seats() {
             "Content-Type": "application/json",
           },
         });
+
         setSeats(res.data.seats);
-        const fetceddata = res.data
       } catch (error) {
         console.error("Error fetching seats:", error);
       }
@@ -45,15 +46,49 @@ function Seats() {
     fetchSeats();
   }, [id]);
 
+  // sockets connection
+  useEffect(() => {
+
+    let socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${id}/seats/`);
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("WebSocket Connected");
+    };
+
+    socket.onmessage = (event) => {
+
+      const data = JSON.parse(event.data);
+      console.log("recieve drom server", data)
+
+      setSeats(prevSeats =>
+        prevSeats.map(seat =>
+          seat.seat_no === data.seat_id
+            ? { ...seat, seat_book: data.action === "select" }
+            : "eroor"
+        )
+      );
+
+    };
+
+    return () => socket.close();
+
+  }, [id]);
+
   // Toggle seat selection
   const toggleSeat = (seat) => {
+
     if (seat.seat_book) return;
 
-    setSelectedSeat((prev) =>
-      prev.includes(seat.id)
-        ? prev.filter((id) => id !== seat.id)
-        : [...prev, seat.id]
-    );
+    const isSelected = selectedSeat.includes(seat.id);
+
+    const newSelected = isSelected
+      ? selectedSeat.filter(id => id !== seat.id)
+      : [...selectedSeat, seat.id];
+    console.log("toggleseat", newSelected)
+
+    setSelectedSeat(newSelected);
+
   };
 
   // Handle booking
@@ -78,9 +113,24 @@ function Seats() {
       );
 
       alert("Seat booked successfully!");
-      const details = res.data
-      navigate(`/mybookings`, { state: { details } })
+      const details = res.data.bookings
+      console.log("booked handle", details)
+      // navigate(`/mybookings`, { state: { details } })
+      details.forEach((handledata) => {
 
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+
+          socketRef.current.send(JSON.stringify({
+            username: handledata.user,
+            seat_id: handledata.seat.seat_no,
+            action: handledata.seat.seat_book ? "active" : "inactive"
+          }));
+
+        } else {
+          console.log("WebSocket not connected");
+        }
+
+      });
 
       // Refresh seats after booking
       const refreshed = await axios.get(
@@ -92,7 +142,7 @@ function Seats() {
       }
       );
       setSeats(refreshed.data.seats);
-      setSelectedSeat(null);
+      setSelectedSeat([]);
 
     } catch (error) {
       console.error("Booking error:", error.response?.data);
@@ -112,12 +162,12 @@ function Seats() {
             <div className="bus-cabin text-center">
               <div className="d-flex flex-wrap justify-content-center">
                 {seats.map((seat) => (
-                  <label key={seat.seat_no} className="seat-container m-2">
+                  <label key={seat.id} className="seat-container m-2">
                     <input
                       type="checkbox"
                       name="seat"
                       disabled={seat.seat_book}
-                      checked={selectedSeat.includes(seat.id)}
+                      checked={selectedSeat.includes(seat.seat_no)}
                       onChange={() => toggleSeat(seat)}
                     />
                     <i
