@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../css/Seats.css";
-import { useParams, useLocation, useNavigation, data } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 // import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -11,14 +11,22 @@ function Seats() {
   const [seats, setSeats] = useState([]);
   const socketRef = useRef(null);
   const [selectedSeat, setSelectedSeat] = useState([]);
+  const [Price,setprice]= useState(0)
   // const navigate = useNavigate();
   const [bus, setbus] = useState("")
 
   const token = localStorage.getItem("access");
+  // particular bus
   useEffect(() => {
     const fetchbus = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/list/buses/${id}`);
+        const response = await axios.get(`buses/${id}`, {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("particular bus ",response.data)
         setbus(response.data)
       } catch (error) {
         console.error("Error fetching seats:", error);
@@ -30,13 +38,13 @@ function Seats() {
   useEffect(() => {
     const fetchSeats = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/list/bus/${id}/seats/`, {
+        const res = await axios.get(`bus/${id}/seats/`, {
           headers: {
             Authorization: `Token ${token}`,
             "Content-Type": "application/json",
           },
         });
-
+        console.log("seats of the bus ",res.data)
         setSeats(res.data.seats);
       } catch (error) {
         console.error("Error fetching seats:", error);
@@ -59,13 +67,13 @@ function Seats() {
     socket.onmessage = (event) => {
 
       const data = JSON.parse(event.data);
-      console.log("recieve drom server", data)
+      console.log("recieve from server", data)
 
       setSeats(prevSeats =>
         prevSeats.map(seat =>
           seat.seat_no === data.seat_id
-            ? { ...seat, seat_book: data.action === "select" }
-            : "eroor"
+            ? { ...seat, seat_book: data.action === "active" }
+            : seat
         )
       );
 
@@ -81,6 +89,8 @@ function Seats() {
     if (seat.seat_book) return;
 
     const isSelected = selectedSeat.includes(seat.id);
+    // busprice calculation while tog
+    console.log("busprice :",bus.price)
 
     const newSelected = isSelected
       ? selectedSeat.filter(id => id !== seat.id)
@@ -88,6 +98,10 @@ function Seats() {
     console.log("toggleseat", newSelected)
 
     setSelectedSeat(newSelected);
+    const singleSeatPrice = parseFloat(bus.price);
+    const totalprice = singleSeatPrice*newSelected.length
+    console.log("price",totalprice)
+    setprice(totalprice)
 
   };
 
@@ -100,8 +114,10 @@ function Seats() {
 
     try {
       const res = await axios.post(
-        `http://127.0.0.1:8000/list/Bookingview/`,
+        `Bookingview/`,
+        // body
         {
+          // here seat neeed to macth with backend while geeting 
           seat: selectedSeat,
         },
         {
@@ -115,7 +131,7 @@ function Seats() {
       alert("Seat booked successfully!");
       const details = res.data.bookings
       console.log("booked handle", details)
-      // navigate(`/mybookings`, { state: { details } })
+      // navigate(`/journeydetails`, { state: { details } })
       details.forEach((handledata) => {
 
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -134,7 +150,7 @@ function Seats() {
 
       // Refresh seats after booking
       const refreshed = await axios.get(
-        `http://127.0.0.1:8000/list/bus/${id}/seats/`, {
+        `bus/${id}/seats/`, {
         headers: {
           Authorization: `Token ${token}`,
           "Content-Type": "application/json",
@@ -157,7 +173,7 @@ function Seats() {
       <div className="container py-5">
         <h2 className="text-center mb-4">Select Your Seats</h2>
         <div className="row">
-          {/* Left - Seats */}
+          {/* Left  */}
           <div className="col-lg-6">
             <div className="bus-cabin text-center">
               <div className="d-flex flex-wrap justify-content-center">
@@ -167,12 +183,12 @@ function Seats() {
                       type="checkbox"
                       name="seat"
                       disabled={seat.seat_book}
-                      checked={selectedSeat.includes(seat.seat_no)}
+                      checked={selectedSeat.includes(seat.id)}
                       onChange={() => toggleSeat(seat)}
                     />
                     <i
                       className={`fas fa-couch seat-icon ${seat.seat_book ? "sold" : ""
-                        } ${selectedSeat === seat.seat_no ? "selected" : ""}`}
+                        } ${selectedSeat === seat.id ? "selected" : ""}`}
                     ></i>
                     <p>{seat.seat_no}</p>
                   </label>
@@ -181,7 +197,7 @@ function Seats() {
             </div>
           </div>
 
-          {/* Right - Trip Details */}
+          {/* Right  */}
           <div className="col-lg-5">
             <div className="glass-card shadow-lg p-4">
               <h3>Trip Details</h3>
@@ -209,7 +225,7 @@ function Seats() {
                     <strong>Reaching  time :</strong> {bus.reach_time}
                   </p>
                   <p>
-                    <strong>Price : </strong>{bus.price}
+                    <strong>Price : </strong>{Price}
                   </p>
 
                 </>

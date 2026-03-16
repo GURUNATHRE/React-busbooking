@@ -213,7 +213,7 @@ function Businput() {
                         </div>
                         {/* need yo handle  */}
                         <div className="col-md-1 d-flex align-items-end">
-                            <button onClick={handleSearch} className="btn w-100 h-75" style={{ backgroundColor: "brown" }}><i className="fa-solid fa-magnifying-glass"></i></button>
+                            <button onClick={handleSearch} className="btn w-100 h-75" style={{ backgroundColor: "#a36532" }}><i className="fa-solid fa-magnifying-glass"></i></button>
                         </div>
                     </div>
                     <datalist id="cityList">
@@ -243,7 +243,7 @@ function Businput() {
                     <div className="col-md-4">
                         <div className="card offer-card shadow-sm bg-success text-white p-4">
                             <h5>CASHBACK ₹150</h5>
-                            <p className="small">On UPI Payments</p>
+                            <p className="small">On visa card</p>
                             <span className="badge bg-white text-success align-self-start">Wallet Offer</span>
                         </div>
                     </div>
