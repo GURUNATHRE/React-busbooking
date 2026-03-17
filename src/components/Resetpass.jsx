@@ -21,7 +21,6 @@ function ResetPassParent() {
 
     setLoading(true);
     try {
-<<<<<<< HEAD
       const usersResponse = await fetch("http://127.0.0.1:8000/list/users/");
       const usersData = await usersResponse.json();
 
@@ -46,14 +45,6 @@ function ResetPassParent() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-=======
-      // Validate email via backend
-      const res = await axios.post("checkemail/", { email });
-
-      if (res.data.status === "success") {
-        setSubmittedEmail(email); // Pass email to child component
-        setMessage({ type: "success", text: res.data.message });
->>>>>>> 934922eb43be73a8ab0e32206868e46a16ee4b0e
       } else {
         setMessage({ type: "error", text: res.data.message });
       }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "../css/Seats.css";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 
 function Seats() {
@@ -11,8 +11,8 @@ function Seats() {
   const [seats, setSeats] = useState([]);
   const socketRef = useRef(null);
   const [selectedSeat, setSelectedSeat] = useState([]);
-  const [Price,setprice]= useState(0)
-  // const navigate = useNavigate();
+  const [Price, setprice] = useState(0)
+  const navigate = useNavigate();
   const [bus, setbus] = useState("")
 
   const token = localStorage.getItem("access");
@@ -26,7 +26,7 @@ function Seats() {
             "Content-Type": "application/json",
           },
         });
-        console.log("particular bus ",response.data)
+        console.log("particular bus ", response.data)
         setbus(response.data)
       } catch (error) {
         console.error("Error fetching seats:", error);
@@ -84,7 +84,7 @@ function Seats() {
 
     const isSelected = selectedSeat.includes(seat.id);
     // busprice calculation while tog
-    console.log("busprice :",bus.price)
+    console.log("busprice :", bus.price)
 
     const newSelected = isSelected
       ? selectedSeat.filter(id => id !== seat.id)
@@ -93,8 +93,8 @@ function Seats() {
 
     setSelectedSeat(newSelected);
     const singleSeatPrice = parseFloat(bus.price);
-    const totalprice = singleSeatPrice*newSelected.length
-    console.log("price",totalprice)
+    const totalprice = singleSeatPrice * newSelected.length
+    console.log("price", totalprice)
     setprice(totalprice)
 
   };
@@ -112,7 +112,7 @@ function Seats() {
       alert("Seat booked successfully!");
       const details = res.data.bookings
       console.log("booked handle", details)
-      // navigate(`/journeydetails`, { state: { details } })
+      navigate(`/bus/${id}/journeydetails`, { state: { details ,Price} })
       details.forEach((handledata) => {
 
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {

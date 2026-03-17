@@ -21,7 +21,7 @@ function App() {
       <Route path="/bus/:id/seats" element={<Seats />} />
       <Route path="/mybookings" element={<Mybookings/>}/>
       <Route path="/editpass" element={<Resetpass/>}/>
-      <Route path="/journeydetails" element={<Paymentprocess/>}/>
+      <Route path="/bus/:id/journeydetails" element={<Paymentprocess/>}/>
 
     </Routes>
   );

@@ -1,0 +1,32 @@
+.journeydetails{
+    background-color: rgb(223, 223, 212);
+}
+/* Custom Brown Button Styling */
+.custom-btn-brown {
+    background-color: #6d4c41 !important; /* Rich Brown */
+    border-color: #5d4037 !important;
+    color: white !important;
+    border-radius: 15px !important; /* Modern rounded corners */
+    padding: 12px 24px;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.custom-btn-brown:hover {
+    background-color: #4e342e !important; /* Darker brown on hover */
+    transform: translateY(-3px); /* Lifts the button up */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important; /* Soft shadow */
+    color: #ffffff !important;
+}
+
+.custom-btn-brown:active {
+    transform: translateY(-1px); /* Pushes down slightly when clicked */
+}
+.booking-page {
+    background-image: url("/images/bus-bg.jpg"); /* your image path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
