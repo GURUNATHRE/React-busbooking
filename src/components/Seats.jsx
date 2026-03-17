@@ -38,13 +38,7 @@ function Seats() {
   useEffect(() => {
     const fetchSeats = async () => {
       try {
-        const res = await axios.get(`bus/${id}/seats/`, {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        console.log("seats of the bus ",res.data)
+        const res = await axios.get(`bus/${id}/seats/`, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
         setSeats(res.data.seats);
       } catch (error) {
         console.error("Error fetching seats:", error);
@@ -113,20 +107,7 @@ function Seats() {
     }
 
     try {
-      const res = await axios.post(
-        `Bookingview/`,
-        // body
-        {
-          // here seat neeed to macth with backend while geeting 
-          seat: selectedSeat,
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.post(`Bookingview/`, { seat: selectedSeat, }, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
 
       alert("Seat booked successfully!");
       const details = res.data.bookings
@@ -149,14 +130,7 @@ function Seats() {
       });
 
       // Refresh seats after booking
-      const refreshed = await axios.get(
-        `bus/${id}/seats/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-      );
+      const refreshed = await axios.get(`/bus/${id}/seats/`, { headers: { Authorization: `Token ${token}`, "Content-Type": "application/json", }, });
       setSeats(refreshed.data.seats);
       setSelectedSeat([]);
 

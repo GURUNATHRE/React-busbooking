@@ -6,11 +6,13 @@ import { useState, useEffect } from "react";
 
 function Businput() {
     const navigate = useNavigate();
+
     // State
     const [from, setFrom] = useState("");
     const [to, setTo] = useState("");
     const [date, setDate] = useState("");
     const [searchTrigger, setSearchTrigger] = useState(false);
+    //  for cites 
     const [cities, setCities] = useState([]);
     const [showFrom, setShowFrom] = useState(false);
     const [showTo, setShowTo] = useState(false);
