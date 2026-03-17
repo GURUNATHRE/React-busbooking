@@ -143,7 +143,7 @@ function Navbar() {
                             <>
                                 <Tooltip title="User Settings">
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar sx={{ bgcolor: '#8D6E63' }}><i class="fa-regular fa-user"></i></Avatar>
+                                        <Avatar sx={{ bgcolor: '#8D6E63' }}><i className="fa-regular fa-user"></i></Avatar>
                                     </IconButton>
                                 </Tooltip>
                                 <Menu
