@@ -1,33 +1,27 @@
+// ResetPassParent.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {Box,TextField,Button,Typography,Paper,InputAdornment,IconButton,Alert,CircularProgress,Container,} from "@mui/material";
-import {Email,Lock,Visibility,VisibilityOff,LockReset,} from "@mui/icons-material";
+import { Box, TextField, Button, Typography, Paper, Alert, Container } from "@mui/material";
+import axios from "axios";
+import ResetPasswordChild from "./ResetPasswordChild"; // Child component import
 
-function ResetPass() {
+function ResetPassParent() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
-  const navigate = useNavigate();
-
-  function handlelogin(){
-    navigate('/')
-  }
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    if (password !== confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match" });
+    if (!email) {
+      setMessage({ type: "error", text: "Email is required" });
       return;
     }
 
     setLoading(true);
-
     try {
+<<<<<<< HEAD
       const usersResponse = await fetch("http://127.0.0.1:8000/list/users/");
       const usersData = await usersResponse.json();
 
@@ -52,12 +46,19 @@ function ResetPass() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+=======
+      // Validate email via backend
+      const res = await axios.post("checkemail/", { email });
+
+      if (res.data.status === "success") {
+        setSubmittedEmail(email); // Pass email to child component
+        setMessage({ type: "success", text: res.data.message });
+>>>>>>> 934922eb43be73a8ab0e32206868e46a16ee4b0e
       } else {
-        const data = await patchResponse.json();
-        setMessage({ type: "error", text: data.password || "Update failed" });
+        setMessage({ type: "error", text: res.data.message });
       }
-    } catch (error) {
-      setMessage({ type: "error", text: "Network error. Please try again." });
+    } catch (err) {
+      setMessage({ type: "error", text: "Server error. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -75,139 +76,34 @@ function ResetPass() {
       }}
     >
       <Container maxWidth="sm">
-        <Paper
-          elevation={10}
-          sx={{
-            p: { xs: 4, md: 6 },
-            borderRadius: 4,
-            textAlign: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          {/* Icon and Title */}
-          <Box
-            sx={{
-              display: "inline-flex",
-              p: 2,
-              borderRadius: "50%",
-              bgcolor: "primary.light",
-              color: "primary.main",
-              mb: 2,
-            }}
-          >
-            <LockReset fontSize="large" />
-          </Box>
-          <Typography variant="h4" fontWeight="700" gutterBottom color="textPrimary">
-            Security Reset
-          </Typography>
-          <Typography variant="body2" color="textSecondary" mb={4}>
-            Please enter your account email and choose a strong new password.
-          </Typography>
+        {!submittedEmail ? (
+          <Paper elevation={10} sx={{ p: 4, borderRadius: 4, textAlign: "center" }}>
+            <Typography variant="h5" mb={2}>
+              Enter your email to reset password
+            </Typography>
 
-          {/* Feedback Message */}
-          {message.text && (
-            <Alert 
-              severity={message.type} 
-              sx={{ mb: 3, borderRadius: 2 }}
-            >
-              {message.text}
-            </Alert>
-          )}
+            {message.text && <Alert severity={message.type} sx={{ mb: 2 }}>{message.text}</Alert>}
 
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Email Input */}
+            <form onSubmit={handleSubmit}>
               <TextField
                 label="Email Address"
-                variant="outlined"
                 fullWidth
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email color="action" />
-                    </InputAdornment>
-                  ),
-                }}
+                sx={{ mb: 3 }}
               />
-
-              {/* Password Input */}
-              <TextField
-                label="New Password"
-                type={showPassword ? "text" : "password"}
-                variant="outlined"
-                fullWidth
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              {/* Confirm Password Input */}
-              <TextField
-                label="Confirm New Password"
-                type="password"
-                variant="outlined"
-                fullWidth
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{
-                  py: 1.5,
-                  borderRadius: 2,
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  fontSize: "1.1rem",
-                  boxShadow: 3,
-                }}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Reset Password"}
+              <Button type="submit" variant="contained" fullWidth disabled={loading}>
+                {loading ? "Checking..." : "Submit"}
               </Button>
-
-              <Button onClick={handlelogin}
-                variant="text" 
-                color="primary" 
-                sx={{ mt: 1, textTransform: "none" }}
-              >
-                Return to Login
-              </Button>
-            </Box>
-          </form>
-        </Paper>
+            </form>
+          </Paper>
+        ) : (
+          <ResetPasswordChild email={submittedEmail} />
+        )}
       </Container>
     </Box>
   );
 }
 
-export default ResetPass;
+export default ResetPassParent;
