@@ -1,165 +1,199 @@
-import React from "react";
-import "../css/Registration.css";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import {
+  Box, Paper, Typography, TextField, Button,
+  IconButton, InputAdornment, Fade, Divider, CircularProgress
+} from "@mui/material";
+import taj from "../assets/taj.jpg";
 
-const baseurl = import.meta.env.VITE_API_BASE_URL;
-function Registration() {
+const internalStyles = {
+  leftPanel: {
+    width: "45%",
+    p: 6,
+    background: "#aac7e2",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  inputField: {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      marginTop: "10px",
+      backgroundColor: "#f8fafc",
+      "& fieldset": { border: "none" },
+      "&:hover fieldset": { border: "none" },
+      "&.Mui-focused fieldset": { border: "1.5px solid #6366f1" },
+    },
+    mb: 0.5,
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    mb: 1.5,
+    ml: 1,
+    display: "block"
+  },
+  indiaGradient: {
+    background: "linear-gradient(to right, #FF9933 33%, white 33%, white 66%, #138808 66%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    display: "inline-block",
+    fontWeight: 900,
+  }
+};
 
-    const { register, handleSubmit ,formState: { errors }} = useForm();
-    const navigate = useNavigate();
+function Registration({ onClose, openLogin }) {
+  const [showPass, setShowPass] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
-    const onSubmit = async (formData) => {
-        try {
-            const response = await fetch(`${baseurl}register/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+  const { register, handleSubmit, formState: { errors } } = useForm({ mode: "onBlur" });
 
-            window.alert("Registration completed");
-            navigate(`/`);
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      console.log("Registering:", data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-        } catch (error) {
-            console.error("Error registering user:", error);
-            alert("Something went wrong. Try again later.");
-        }
-    };
+  return (
+    <Fade in={true} timeout={500}>
+      <Box onClick={onClose} sx={{ position: "fixed", inset: 0, display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999, backdropFilter: "blur(12px)" }}>
+        <Paper onClick={(e) => e.stopPropagation()} elevation={0} sx={{ width: "1000px", height: "650px", display: "flex", borderRadius: "32px", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
 
-    const passwordshow = (event) => {
-        const icon = event.target;
-        const input = icon.parentElement.previousElementSibling;
+          {/* LEFT SIDE */}
+          <Box sx={internalStyles.leftPanel}>
+            <Typography variant="overline" sx={{ color: "#6366f1", fontWeight: 900, letterSpacing: 1.5 }}>
+              TRIPORA TRAVELS
+            </Typography>
 
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-            input.type = "password";
-            icon.classList.replace("fa-eye-slash", "fa-eye");
-        }
-    };
-    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return (
-        <div className="registration-container">
-            <div className="container-fluid">
-                <div className="row" style={{ height: "100vh" }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a", mt: 1 }}>
+              Create Account
+            </Typography>
 
-                    {/* LEFT SIDE */}
-                    <div className="col-lg-7 d-none d-lg-flex login-side-img align-items-center justify-content-center text-white text-center">
-                        <div className="px-5">
-                            <h1 className="display-3 fw-bold mb-4">Start Your Journey</h1>
-                            <h4 className="lead">
-                                <b>Create an account to book tickets in seconds and manage your trips effortlessly.</b>
-                            </h4>
-                        </div>
-                    </div>
+            <Typography variant="body2" sx={{ color: "#64748b", mb: 4, mt: 0.5 }}>
+              Join us to discover the hidden gems of India.
+            </Typography>
 
-                    {/* RIGHT SIDE FORM */}
-                    <div className="col-lg-5 d-flex align-items-center bg-white">
-                        <div className="container p-5">
+            <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 2 }}>
+              <TextField
+                fullWidth size="small" placeholder="Full Name"
+                sx={internalStyles.inputField}
+                {...register("username", { required: "Username is required" })}
+                error={!!errors.username}
+              />
+              {errors.username && <Typography sx={internalStyles.errorText}>{errors.username.message}</Typography>}
 
-                            <div className="text-center mb-4">
-                                <span className="navbar-brand fs-2 mb-3 d-block">
-                                    <i className="fa-solid fa-bus-simple me-2"></i>BusTicket
-                                </span>
-                                <h3 className="fw-bold">Create Account</h3>
-                                <p className="text-muted">Fill in the details below</p>
-                            </div>
+              <TextField
+                fullWidth size="small" placeholder="Email Address"
+                sx={internalStyles.inputField}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email" }
+                })}
+                error={!!errors.email}
+              />
+              {errors.email && <Typography sx={internalStyles.errorText}>{errors.email.message}</Typography>}
 
-                            <form onSubmit={handleSubmit(onSubmit)}>
+              <TextField
+                fullWidth size="small" type={showPass ? "text" : "password"} placeholder="Password"
+                sx={internalStyles.inputField}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 8, message: "Use 8+ characters" }
+                })}
+                error={!!errors.password}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPass(!showPass)} size="small">
+                        <i className={`fa-solid ${showPass ? "fa-eye-slash" : "fa-eye"}`} style={{ color: '#94a3b8', fontSize: '1rem' }} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+              {errors.password && <Typography sx={internalStyles.errorText}>{errors.password.message}</Typography>}
 
-                                <div className="form-floating mb-3">
-                                    <input
-                                        type="text"
-                                        className="form-control shadow-sm border-0 bg-light"
-                                        placeholder="Username"
-                                        {...register("username",{
-                                            required :" username is required ",
-                                            pattern:{
-                                                value : usernameRegex,
-                                                message : "username should have capital letters as well "
-                                            }
-                                        })}
-                                    />
-                                    <label>User Name</label>
-                                    {errors.username && (
-                                        <p className="text-danger small mt-1">{errors.username.message}</p>
-                                    )}
-                                </div>
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                sx={{
+                  py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
+                  textTransform: "none", fontSize: "1rem",
+                  bgcolor: "#6366f1",
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
+              >
+                {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
+              </Button>
+            </form>
 
-                                <div className="form-floating mb-3">
-                                    <input
-                                        type="email"
-                                        className="form-control shadow-sm border-0 bg-light"
-                                        placeholder="Email"
-                                        {...register("email", {
-                                            required: "email is required",
-                                            pattern: {
-                                                value: emailRegex,
-                                                message: " email must be 8+ chars, with upper, lower, number & symbol"
-                                            }
-                                        })}
-                                    />
-                                    <label>Email Address</label>
-                                    {errors.email && (
-                                        <p className="text-danger small mt-1">{errors.email.message}</p>
-                                    )}
-                                </div>
+            <Divider sx={{ my: 3 }}>
+              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600 }}>
+                OR
+              </Typography>
+            </Divider>
 
-                                <div className="form-floating mb-3 position-relative">
-                                    <input
-                                        type="password"
-                                        className="form-control shadow-sm border-0 bg-light"
-                                        placeholder="Password"
-                                        {...register("password", {
-                                            required: "password is required",
-                                            pattern: {
-                                                value: passwordRegex,
-                                                message: "Password must be 8+ chars, with upper, lower, number & symbol"
-                                            }
-                                        })}
-                                    />
+            <Box display="flex" gap={2}>
+              <Button fullWidth variant="outlined">
+                <i className="fa-brands fa-google" style={{ marginRight: 8 }} /> Google
+              </Button>
+              <Button fullWidth variant="outlined">
+                <i className="fa-brands fa-apple" style={{ marginRight: 8 }} /> Apple
+              </Button>
+            </Box>
 
-                                    <div className="position-absolute top-0 end-0 py-3 px-3 eye-css">
-                                        <i className="fa-solid fa-eye" onClick={passwordshow}></i>
-                                    </div>
+            {/* ✅ FIXED LOADER */}
+            <Typography variant="body2" align="center" sx={{ mt: 4, color: "#64748b" }}>
+              Already a member?{" "}
+              <span
+                onClick={() => {
+                  setIsSwitching(true);
+                  setTimeout(() => {
+                    setIsSwitching(false);
+                    openLogin();
+                  }, 800);
+                }}
+                style={{
+                  color: "#6366f1",
+                  cursor: "pointer",
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}
+              >
+                {isSwitching ? (
+                  <CircularProgress size={14} sx={{ color: "#6366f1" }} />
+                ) : (
+                  "Login here"
+                )}
+              </span>
+            </Typography>
+          </Box>
 
-                                    <label>Password</label>
-                                    {errors.password && (
-                                        <p className="text-danger small mt-1">{errors.password.message}</p>
-                                    )}
-                                </div>
+          {/* RIGHT SIDE */}
+          <Box sx={{ width: "55%", position: "relative" }}>
+            <Box component="img" src={taj} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(20deg, #1e293b 0%, transparent 60%)", opacity: 0.8 }} />
+            <Box sx={{ position: "absolute", bottom: 60, left: 50 }}>
+              <Typography variant="h3" sx={{ fontWeight: 900, color: "white" }}>
+                Explore<br />
+                <span style={internalStyles.indiaGradient}>INDIA</span>
+              </Typography>
+            </Box>
+          </Box>
 
-                                <button
-                                    type="submit"
-                                    className="btn btn-brand w-100 py-3 fw-bold shadow"
-                                >
-                                    SIGN UP
-                                </button>
-
-                                <div className="text-center mt-4">
-                                    <p className="text-muted small">
-                                        Already have an account?
-                                        <a
-                                            href="/"
-                                            className="text-brand fw-bold text-decoration-none ms-1"
-                                        >
-                                            Login here
-                                        </a>
-                                    </p>
-                                </div>
-
-                            </form>
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    );
+        </Paper>
+      </Box>
+    </Fade>
+  );
 }
 
 export default Registration;

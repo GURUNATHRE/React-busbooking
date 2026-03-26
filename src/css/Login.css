@@ -1,0 +1,37 @@
+.login-input .MuiOutlinedInput-root {
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.login-error {
+  color: red;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.login-btn {
+  background-color: #6366f1 !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-weight: 600;
+}
+
+.login-btn:hover {
+  background-color: #4f46e5 !important;
+}
+
+.social-btn {
+  border-radius: 10px !important;
+  border: 1px solid #ddd !important;
+  color: #333 !important;
+}
+
+/* INDIA tricolor */
+.india-text {
+  background: linear-gradient(to right, #FF9933 33%, white 33%, white 66%, #138808 66%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
