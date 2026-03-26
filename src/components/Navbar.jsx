@@ -1,31 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import {
-    AppBar,
-    Box,
-    Toolbar,
-    IconButton,
-    Typography,
-    Menu,
-    Container,
-    Avatar,
-    Button,
-    Tooltip,
-    MenuItem,
+    AppBar, Box, Toolbar, IconButton, Typography, Menu,
+    Container, Avatar, Button, Tooltip, MenuItem, Stack
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import LockIcon from '@mui/icons-material/Lock'; // Added for visual cue
 
 const pages = [
-    { name: 'Home', path: '/businput' },
+    { name: 'Home', path: '/' },
     { name: 'Buses', path: '/buses' },
     { name: 'My Bookings', path: '/mybookings' },
 ];
 
-function Navbar() {
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
-    
+function Navbar({ onLoginClick }) {
+    const [anchorElNav, setAnchorElNav] = useState(null);
+    const [anchorElUser, setAnchorElUser] = useState(null);
+
     const navigate = useNavigate();
     const location = useLocation();
     const usertoken = localStorage.getItem("access");
@@ -39,43 +31,49 @@ function Navbar() {
         localStorage.removeItem("access");
         handleCloseUserMenu();
         navigate('/');
+        window.location.reload();
     };
 
-    // Style logic for navigation buttons
+    // Helper to determine if a link should be disabled
+    const isPageDisabled = (path) => !usertoken && path !== '/';
+
     const getButtonStyle = (path) => {
         const isActive = location.pathname === path;
+        const isDisabled = isPageDisabled(path);
+
         return {
             my: 2,
             color: 'white',
-            display: 'block',
             textTransform: 'none',
             fontSize: '0.95rem',
             fontWeight: isActive ? 700 : 400,
-            opacity: isActive ? 0.5 : 1, 
-            pointerEvents: isActive ? 'none' : 'auto', 
-            transition: 'opacity 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            // Visual feedback for disabled/active states
+            opacity: (isActive || isDisabled) ? 0.5 : 1,
+            pointerEvents: (isActive || isDisabled) ? 'none' : 'auto',
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
             '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: isDisabled ? 'transparent' : 'rgba(255,255,255,0.1)',
             }
         };
     };
 
     return (
-        <AppBar position="sticky" sx={{ backgroundColor: '#6D4C41', boxShadow: 2 }}>
+        <AppBar position="sticky" sx={{ backgroundColor: '#7c99b6e0', boxShadow: 'none' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     {/* Desktop Logo */}
-                    <DirectionsBusIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: 'white' }} />
+                    <DirectionsBusIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
                     <Typography
                         variant="h6"
-                        noWrap
                         component={RouterLink}
-                        to="/businput"
+                        to="/"
                         sx={{
                             mr: 4,
                             display: { xs: 'none', md: 'flex' },
                             fontWeight: 800,
-                            letterSpacing: '.1rem',
                             color: 'white',
                             textDecoration: 'none',
                         }}
@@ -85,39 +83,46 @@ function Navbar() {
 
                     {/* Mobile Menu Icon */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                        <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
+                        <IconButton onClick={handleOpenNavMenu} color="inherit">
                             <MenuIcon />
                         </IconButton>
                         <Menu
                             anchorEl={anchorElNav}
                             open={Boolean(anchorElNav)}
                             onClose={handleCloseNavMenu}
-                            sx={{ display: { xs: 'block', md: 'none' } }}
+                            sx={{ mt: '5px' }}
                         >
-                            {pages.map((page) => (
-                                <MenuItem 
-                                    key={page.name} 
-                                    onClick={() => { navigate(page.path); handleCloseNavMenu(); }}
-                                    disabled={location.pathname === page.path}
-                                >
-                                    <Typography textAlign="center">{page.name}</Typography>
-                                </MenuItem>
-                            ))}
+                            {pages.map((page) => {
+                                const disabled = isPageDisabled(page.path);
+                                return (
+                                    <MenuItem 
+                                        key={page.name} 
+                                        disabled={disabled}
+                                        onClick={() => {
+                                            navigate(page.path);
+                                            handleCloseNavMenu();
+                                        }}
+                                    >
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <Typography>{page.name}</Typography>
+                                            {disabled && <LockIcon sx={{ fontSize: '14px', color: 'text.disabled' }} />}
+                                        </Stack>
+                                    </MenuItem>
+                                );
+                            })}
                         </Menu>
                     </Box>
 
                     {/* Mobile Logo */}
-                    <DirectionsBusIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
                     <Typography
                         variant="h6"
-                        noWrap
                         component={RouterLink}
-                        to="/businput"
+                        to="/"
                         sx={{
                             flexGrow: 1,
                             display: { xs: 'flex', md: 'none' },
                             fontWeight: 700,
-                            color: 'inherit',
+                            color: 'white',
                             textDecoration: 'none',
                         }}
                     >
@@ -125,46 +130,60 @@ function Navbar() {
                     </Typography>
 
                     {/* Desktop Navigation Links */}
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-                        {pages.map((page) => (
-                            <Button
-                                key={page.name}
-                                onClick={() => navigate(page.path)}
-                                sx={getButtonStyle(page.path)}
-                            >
-                                {page.name}
-                            </Button>
-                        ))}
+                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                        {pages.map((page) => {
+                            const disabled = isPageDisabled(page.path);
+                            return (
+                                <Button
+                                    key={page.name}
+                                    sx={getButtonStyle(page.path)}
+                                    onClick={() => navigate(page.path)}
+                                >
+                                    {page.name}
+                                    {disabled && <LockIcon sx={{ fontSize: '16px' }} />}
+                                </Button>
+                            );
+                        })}
                     </Box>
 
-                    {/* User Section */}
+                    {/* User Profile / Login Section */}
                     <Box sx={{ flexGrow: 0 }}>
                         {usertoken ? (
                             <>
-                                <Tooltip title="User Settings">
+                                <Tooltip title="Open settings">
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar sx={{ bgcolor: '#8D6E63' }}><i className="fa-regular fa-user"></i></Avatar>
+                                        <Avatar sx={{ bgcolor: '#4e4c49', width: 35, height: 35 }}>
+                                            <i className="fa-regular fa-user" style={{ fontSize: '14px' }}></i>
+                                        </Avatar>
                                     </IconButton>
                                 </Tooltip>
                                 <Menu
                                     sx={{ mt: '45px' }}
                                     anchorEl={anchorElUser}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                    keepMounted
+                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     open={Boolean(anchorElUser)}
                                     onClose={handleCloseUserMenu}
                                 >
-                                    <MenuItem onClick={() => { navigate('/profile'); handleCloseUserMenu(); }}>Profile</MenuItem>
-                                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                    <MenuItem onClick={() => { navigate('/profile'); handleCloseUserMenu(); }}>
+                                        <Typography textAlign="center">Profile</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleLogout}>
+                                        <Typography textAlign="center" color="error">Logout</Typography>
+                                    </MenuItem>
                                 </Menu>
                             </>
                         ) : (
-                            <Button 
-                                variant="contained" 
-                                onClick={() => navigate('/')}
-                                sx={{ 
-                                    backgroundColor: '#8D6E63', 
-                                    color: 'white',
+                            <Button
+                                variant="contained"
+                                onClick={onLoginClick}
+                                sx={{
+                                    backgroundColor: '#4e4c49',
+                                    borderRadius: '20px',
+                                    px: 3,
                                     textTransform: 'none',
-                                    '&:hover': { backgroundColor: '#5D4037' }
+                                    '&:hover': { backgroundColor: '#333' }
                                 }}
                             >
                                 Login

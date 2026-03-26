@@ -1,170 +1,220 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import "../css/Registration.css";
-import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  Box, Paper, Typography, TextField, Button,
+  IconButton, InputAdornment, Fade, Checkbox, FormControlLabel, CircularProgress,Divider
+} from "@mui/material";
+import bus from "../assets/bus.jpg";
+import "../css/Login.css";
 
-function Login() {
-  const navigate = useNavigate();
+// Styles (unchanged)
+const internalStyles = {
+  leftPanel: {
+    width: "45%",
+    p: 6,
+    background: "#aac7e2",
+    backdropFilter: "blur(20px)",
+    display: "flex",
+    flexDirection: "column",
+    color: "#1e293b",
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    mt: 0.5,
+    ml: 1,
+    display: "block"
+  },
+  indiaGradient: {
+    background: "linear-gradient(to right, #FF9933 33%, white 33%, white 66%, #138808 66%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    display: "inline-block",
+    fontWeight: 900,
+  }
+};
 
-  // useForm hook
+function Login({ onClose, openRegister }) {
+  const [showPass, setShowPass] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ FIXED
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setError, // <-- add setError
-  } = useForm();
+    setError
+  } = useForm({ mode: "onBlur" });
+
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const onSubmit = async (data) => {
+    setServerError("");
     try {
-      const res = await axios.post("Loginview/", {
-        email: data.email,
-        password: data.password,
-      });
-
+      const res = await axios.post(`${BASE_URL}Loginview/`, data);
       if (res.status === 200) {
-        // store token
         localStorage.setItem("access", res.data.token);
-        // redirect after login
-        navigate("/businput");
+        onClose();
       }
     } catch (error) {
-      if (error.response) {
-        // If invalid credentials, show below password field
-        if (error.response.data.error === "Invalid credentials") {
-          setError("password", {
-            type: "manual",
-            message: "Invalid credentials",
-          });
-        } else {
-          alert(error.response.data.error || "Login failed");
-        }
-      } else {
-        alert("Server error");
-      }
+      const msg = error.response?.data?.error || "Invalid credentials. Please try again.";
+      setServerError(msg);
+      setError("password", { type: "manual" });
     }
-  };
-
-  const passwordshow = (event) => {
-    const icon = event.target;
-    const input = icon.parentElement.previousElementSibling;
-
-    if (input.type === "password") {
-      input.type = "text";
-      icon.classList.replace("fa-eye", "fa-eye-slash");
-    } else {
-      input.type = "password";
-      icon.classList.replace("fa-eye-slash", "fa-eye");
-    }
-  };
-
-  const googleLogin = () => {
-    console.log("Google login");
   };
 
   return (
-    <div className="container-fluid">
-      <div className="row" style={{ height: "100vh" }}>
-        {/* LEFT SIDE */}
-        <div className="col-lg-7 d-none d-lg-flex login-side-img align-items-center justify-content-center text-white text-center">
-          <div className="px-5">
-            <h1 className="display-3 fw-bold mb-4">Welcome, Start Your Journey</h1>
-            <p className="lead">Join over 10 million happy travelers across India.</p>
-          </div>
-        </div>
+    <Fade in={true} timeout={500}>
+      <Box
+        onClick={onClose}
+        sx={{
+          position: "fixed",
+          inset: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999,
+          backdropFilter: "blur(8px)"
+        }}
+      >
+        <Paper
+          onClick={(e) => e.stopPropagation()}
+          elevation={24}
+          sx={{
+            width: "950px",
+            height: "600px",
+            display: "flex",
+            borderRadius: 6,
+            overflow: "hidden"
+          }}
+        >
 
-        {/* RIGHT SIDE */}
-        <div className="col-lg-5 d-flex align-items-center bg-white">
-          <div className="container p-5">
-            <div className="text-center mb-5">
-              <span className="navbar-brand fs-2 mb-3 d-block">
-                <i className="fa-solid fa-bus-simple me-2"></i>BusTicket
-              </span>
-              <h3 className="fw-bold">Welcome Back!</h3>
-              <p className="text-muted">Log in to your account to continue</p>
-            </div>
+          {/* LEFT SIDE */}
+          <Box sx={internalStyles.leftPanel}>
+            <Typography variant="overline" sx={{ color: "#6366f1", fontWeight: 800 }}>
+              TRIPORA TRAVELS
+            </Typography>
+
+            <Typography variant="h4" fontWeight={800} sx={{ mt: 1 }}>
+              Welcome Back
+            </Typography>
+
+            <Typography variant="body2" sx={{ color: "#64748b", mb: 4 }}>
+              Please enter your details to continue.
+            </Typography>
 
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="form-floating mb-3">
-                <input
-                  type="email"
-                  className="form-control shadow-sm border-0 bg-light"
-                  placeholder="name@example.com"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Invalid email format",
-                    },
-                  })}
-                />
-                <label>Email</label>
-                {errors.email && <p className="text-danger small">{errors.email.message}</p>}
-              </div>
 
-              <div className="form-floating mb-3 position-relative">
-                <input
-                  type="password"
-                  className="form-control shadow-sm border-0 bg-light"
-                  placeholder="Password"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: { value: 8, message: "Password must be at least 8 characters" },
-                  })}
-                />
-                <div className="position-absolute top-0 end-0 py-3 px-3 eye-css">
-                  <i className="fa-solid fa-eye" onClick={passwordshow}></i>
-                </div>
-                <label>Password</label>
-                {errors.password && <p className="text-danger small">{errors.password.message}</p>}
-              </div>
+              {/* EMAIL */}
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Email Address"
+                className="login-input"
+                {...register("email", { required: "Email is required" })}
+                error={!!errors.email}
+                sx={{ mb: errors.email ? 0.5 : 2 }}
+              />
+              {errors.email && (
+                <Typography sx={internalStyles.errorText}>
+                  {errors.email.message}
+                </Typography>
+              )}
 
-              <div className="d-flex justify-content-between mb-4 small">
-                <div className="form-check">
-                  <input className="form-check-input" type="checkbox" />
-                  <label className="form-check-label text-muted">Remember me</label>
-                </div>
-                <Link to="/editpass" className="text-decoration-none text-brand fw-bold">
-                  Forgot Password?
-                </Link>
-              </div>
+              {/* PASSWORD */}
+              <TextField
+                fullWidth
+                size="small"
+                type={showPass ? "text" : "password"}
+                placeholder="Password"
+                className="login-input"
+                {...register("password", { required: "Password is required" })}
+                error={!!errors.password || !!serverError}
+                sx={{ mb: 2 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPass(!showPass)}>
+                        <i className={`fa-solid ${showPass ? "fa-eye-slash" : "fa-eye"}`} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
 
-              <button type="submit" className="btn btn-brand w-100 py-3 fw-bold shadow">
-                LOGIN <i className="fa-solid fa-arrow-right-to-bracket ms-2"></i>
-              </button>
+              {(errors.password || serverError) && (
+                <Typography sx={internalStyles.errorText}>
+                  {errors.password?.message || serverError}
+                </Typography>
+              )}
+
+              {/* BUTTON */}
+              <Button fullWidth type="submit" className="login-btn">
+                Sign In
+              </Button>
             </form>
 
-            <div className="text-center my-4">
-              <span className="text-muted small">OR</span>
-              <hr />
-            </div>
 
-            <button
-              type="button"
-              onClick={googleLogin}
-              className="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2"
-            >
-              <i className="fa-brands fa-google m-2"></i> Continue with Google
-            </button>
+            <Divider sx={{ mt:3}}>
+              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600 }}>
+                OR
+              </Typography>
+            </Divider>
 
-            <div className="text-center mt-5">
-              <p className="text-muted small">
-                New to BusTicket?
-                <Link to="/Registration" className="text-brand fw-bold text-decoration-none ms-1">
-                  Create an account
-                </Link>
-              </p>
-              <p className="text-muted small">
-                Reset Password?
-                <Link to="/editpass" className="text-brand fw-bold text-decoration-none ms-1">
-                  Reset
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Box display="flex" gap={2} mt={4}>
+              <Button fullWidth variant="outlined">
+                <i className="fa-brands fa-google" style={{ marginRight: 8 }} /> Google
+              </Button>
+              <Button fullWidth variant="outlined">
+                <i className="fa-brands fa-apple" style={{ marginRight: 8 }} /> Apple
+              </Button>
+            </Box>
+
+            {/* REGISTER WITH LOADER */}
+            <Typography align="center" sx={{ mt: 3 }}>
+              New here?{" "}
+              <span
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    setLoading(false);
+                    openRegister();
+                  }, 800);
+                }}
+                style={{
+                  color: "#6366f1",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center"
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={16} sx={{ color: "#6366f1" }} />
+                ) : (
+                  "Create Account"
+                )}
+              </span>
+            </Typography>
+          </Box>
+
+          {/* RIGHT SIDE */}
+          <Box sx={{ width: "55%", position: "relative" }}>
+            <Box component="img" src={bus} sx={{ width: "100%", height: "100%" }} />
+            <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #1e293b, transparent)" }} />
+            <Box sx={{ position: "absolute", bottom: 60, left: 50 }}>
+              <Typography variant="h3" color="white">
+                Explore<br />
+                <span style={internalStyles.indiaGradient}>INDIA</span>
+              </Typography>
+            </Box>
+          </Box>
+
+        </Paper>
+      </Box>
+    </Fade>
   );
 }
 

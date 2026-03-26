@@ -1,6 +1,26 @@
-#root{
+#root {
     height: 100vh;
 }
-#total{
+
+#total {
     height: 100vh;
+}
+
+.showform {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 9999;
+}
+.total{
+    background-image: url("../assets/businput.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat
 }
