@@ -13,7 +13,7 @@ const internalStyles = {
   leftPanel: {
     width: "45%",
     p: 6,
-    background: "#aac7e2",
+    background: "#ffffff",
     backdropFilter: "blur(20px)",
     display: "flex",
     flexDirection: "column",
@@ -93,8 +93,8 @@ function Login({ onClose, openRegister }) {
 
           {/* LEFT SIDE */}
           <Box sx={internalStyles.leftPanel}>
-            <Typography variant="overline" sx={{ color: "#6366f1", fontWeight: 800 }}>
-              TRIPORA TRAVELS
+            <Typography variant="overline" sx={{ color: "#f1b47bf6", fontWeight: 800 }}>
+              Bus Booking
             </Typography>
 
             <Typography variant="h4" fontWeight={800} sx={{ mt: 1 }}>
@@ -107,8 +107,6 @@ function Login({ onClose, openRegister }) {
 
             <form onSubmit={handleSubmit(onSubmit)}>
 
-              {/* EMAIL */}
-              {/* EMAIL */}
               <TextField
                 fullWidth
                 size="small"
@@ -131,7 +129,7 @@ function Login({ onClose, openRegister }) {
               )}
 
               {/* PASSWORD */}
-              <TextField
+              <TextField 
                 fullWidth
                 size="small"
                 type={showPass ? "text" : "password"}
@@ -162,23 +160,29 @@ function Login({ onClose, openRegister }) {
               )}
 
               {/* BUTTON */}
-              <Button fullWidth type="submit" className="login-btn">
+              <Button fullWidth type="submit" sx={{
+                py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
+                textTransform: "none", fontSize: "1rem",
+                bgcolor: "#f1b47bf6",
+                color: "white",
+                '&:hover': { bgcolor: '#f8aa61f6' }
+              }}>
                 Sign In
               </Button>
             </form>
 
 
-            <Divider sx={{ mt: 3 }}>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600 }}>
+            <Divider sx={{ my: 3 }}>
+              <Typography variant="caption" sx={{ color: "#1b1b1b", fontWeight: 600 }}>
                 OR
               </Typography>
             </Divider>
 
-            <Box display="flex" gap={2} mt={4}>
-              <Button fullWidth variant="outlined">
+            <Box display="flex" gap={2}>
+              <Button fullWidth variant="outlined" sx={{ color: "black", borderColor: 'black', borderRadius: 2 }} >
                 <i className="fa-brands fa-google" style={{ marginRight: 8 }} /> Google
               </Button>
-              <Button fullWidth variant="outlined">
+              <Button fullWidth variant="outlined" sx={{ color: "black", borderColor: 'black', borderRadius: 2 }}>
                 <i className="fa-brands fa-apple" style={{ marginRight: 8 }} /> Apple
               </Button>
             </Box>
@@ -195,7 +199,7 @@ function Login({ onClose, openRegister }) {
                   }, 800);
                 }}
                 style={{
-                  color: "#6366f1",
+                  color: "#a8a19af6",
                   cursor: "pointer",
                   fontWeight: 700,
                   display: "inline-flex",
@@ -203,7 +207,7 @@ function Login({ onClose, openRegister }) {
                 }}
               >
                 {loading ? (
-                  <CircularProgress size={16} sx={{ color: "#6366f1" }} />
+                  <CircularProgress size={16} sx={{ color: "#f1b47bf6" }} />
                 ) : (
                   "Create Account"
                 )}

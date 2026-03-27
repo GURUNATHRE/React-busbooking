@@ -1,104 +1,124 @@
-/* Wrapper for the whole page */
-.seats-wrapper {
-  background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
-              url("../assets/seats.jpg") no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100vh;
+.seats-wrapper{
+  background-color: #f8efe8;
+  height: 92vh;
+}
+.back-btn-orange {
+  background-color: #ff8c00 !important;
+  color: #fff !important;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  padding: 60px 0;
-  color: white; /* Force all text in wrapper to white */
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  z-index: 5;
+  transition: all 0.3s ease;
+  margin-left: '10px';
 }
-
-/* The Bus Cabin wrapper */
-.bus-cabin {
-  background: rgba(30, 30, 47, 0.85);
-  backdrop-filter: blur(5px);
-  padding: 25px 10px; 
-  border-radius: 20px 80px 80px 20px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  
-  /* The Key Changes */
-  max-width: 400px;  /* Increased width */
-  min-height: 200px; /* Low height constraint */
-  margin: auto;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+.back-btn-orange:hover {
+  background-color: #e67e00 !important;
+  transform: translateX(-3px);
 }
+.seats-grid-layout.seat-wrapper{
+  color: #fff;
+}
+.aisle-gap { width: 20px; }
 
-/* Steering Wheel section */
-.steering-section {
+.legend-pills {
+  background: #fff;
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 30px;
-  color: #ffc107;
+  justify-content: space-around;
+  padding: 12px;
+  border-radius: 12px;
+}
+.legend-item { font-size: 0.8rem; font-weight: bold; color: #2d3436; }
+.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 5px; }
+.dot.avail { background: #636e72; }
+.dot.selected-dot { background: #2ecc71; }
+.dot.held-dot { background: #f1c40f; }
+.dot.sld { background: #d63031; }
+
+
+.pay-btn { border-radius: 12px; padding: 12px; }
+.trip-card { border-radius: 20px; border: none; }
+
+.bus-chassis {
+  background: #2d3436;
+  width: 280px;
+  padding: 70px 20px 30px;
+  border-radius: 40px 40px 15px 15px;
+  border: 5px solid #1e272e;
+  margin: 0 auto; 
 }
 
-/* Structured Grid: 2 seats | Aisle (40px) | 2 seats */
-.seats-grid {
+
+.seats-grid-layout {
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 40px repeat(2, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(2, 1fr) 20px repeat(2, 1fr); 
+  gap: 20px 10px;
   align-items: center;
 }
 
-.aisle-space {
-  grid-column: 3;
-}
-
-/* Seat Styling */
-.seat-container {
+/* THE FIX: Vertical stacking and centering */
+.seat-wrapper {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: column; /* Stacks icon and number vertically */
+  align-items: center;    /* Centers items horizontally */
+  justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  color: #fff;            /* Makes the number white */
+  transition: transform 0.2s ease;
 }
 
-.seat-container:hover:not(.sold):not(.held) {
-  transform: translateY(-5px) scale(1.1);
+.seat-wrapper:hover {
+  transform: scale(1.1);
 }
 
 .seat-icon {
-  font-size: 2rem;
-  color: #a0a0a0; /* Default Available */
-  transition: color 0.3s ease;
+  font-size: 1.5rem;
+  margin-bottom: 5px;     /* Space between couch and number */
+  display: block;
 }
 
-.seat-icon.selected { color: #28a745 !important; }
-.seat-icon.sold { color: #dc3545 !important; opacity: 0.5; cursor: not-allowed; }
-.seat-icon.held { color: #fd7e14 !important; animation: pulse-hold 1.2s infinite; }
-
-.seat-container p {
-  margin-top: 5px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #4f4b4b; /* White text for seat numbers */
+.seat-number {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #ffffff;         /* Ensures number is white */
+  text-align: center;
+  width: 100%;
 }
 
-/* Trip Details Card - High Contrast */
-.glass-card {
-  background: rgba(255, 255, 255, 0.95); /* Bright background for data readability */
-  border-radius: 20px;
-  color: #121212 !important; /* Dark text for contrast on light card */
-  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-}
+/* Icon Colors */
+.seat-icon.sold { color: #d63031 !important; }
+.seat-icon.held { color: #f1c40f !important; }
+.seat-icon.selected { color: #2ecc71 !important; }
+/* Default available color */
+.seat-icon { color: #636e72; }
 
-.glass-card p strong {
-  color: #555;
-}
+.custom-express-badge {
 
-.price-box {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 12px;
-  border-left: 5px solid #28a745;
-}
+  background-color: #e09d46 !important; 
+  color: #ffffff !important;
 
-/* Legend */
-.legend {
-  display: flex;
+  /* 3. Border (Solid Black) */
+  border: 1px solid #000000 !important;
+
+  /* 4. Border Radius (Makes it a perfect pill shape) */
+  border-radius: 50px !important;
+
+  /* Typography & Layout */
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 6px 16px !important; 
+  
+  /* Modern Styling */
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  font-size: 0.8rem;
+  transition: all 0.2s ease-in-out;
 }

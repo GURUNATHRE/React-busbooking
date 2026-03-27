@@ -3,15 +3,21 @@ import { useLocation, useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import axios from "axios";
 import '../css/Paymentprocess.css';
+import {
+    Box, Grid, Card, CardContent, Typography, Button,
+    TextField, MenuItem, IconButton, Container
+} from "@mui/material";
+import { BusAlert, LocalOffer, Timer } from "@mui/icons-material";
+import { Divider, Chip, Stack } from "@mui/material";
+import { Person, Badge, Transgender, Edit, CheckCircle } from "@mui/icons-material";
+import { InputAdornment, Fade } from "@mui/material";
 
 function Paymentprocess() {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Data coming from Seats.jsx
     const { selectedSeatIds, selectedSeatNos, Price, busId } = location.state || {};
-
     const token = localStorage.getItem("access");
 
     const [coupons, setCoupons] = useState([]);
@@ -20,7 +26,7 @@ function Paymentprocess() {
     const [submitted, setSubmitted] = useState(false);
     const [couponInput, setCouponInput] = useState("");
 
-    // Particular bus details
+    // ... (Keep your existing useEffects and handleInputChange here) ...
     useEffect(() => {
         const fetchbus = async () => {
             try {
@@ -38,7 +44,6 @@ function Paymentprocess() {
         fetchbus();
     }, [id, token]);
 
-    // Coupons
     useEffect(() => {
         const fetchCoupons = async () => {
             try {
@@ -53,7 +58,6 @@ function Paymentprocess() {
         fetchCoupons();
     }, [token]);
 
-    // Initialize traveler forms based on number of seats selected
     useEffect(() => {
         if (selectedSeatIds && selectedSeatIds.length > 0) {
             setTravelers(selectedSeatIds.map(() => ({ name: "", age: "", gender: "" })));
@@ -75,282 +79,510 @@ function Paymentprocess() {
     const finalPrice = Price - Number(appliedCoupon?.amount || 0) + 10;
 
     const handleProceedToPayment = () => {
-        navigate(`/bus/${id}/journeydetails//payment/`, {
-            state: {
-                selectedSeatIds,
-                selectedSeatNos,
-                travelers,
-                Price,
-                finalPrice,
-                busId,
-            }
+        navigate(`/bus/${id}/journeydetails/payment/`, {
+            state: { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId }
         });
     };
 
     return (
-        <div className="min-vh-200 booking-page">
+        <>
             <Navbar />
-            <div className="container py-5">
-                <div className="row g-4">
-                    {/* Left Column */}
-                    <div className="col-lg-8">
-                        {/* Bus Ticket Card */}
-                        {businfo && (
-                            <div className="card border-0 shadow-lg mb-4 overflow-hidden rounded-4">
-                                <div
-                                    className="card-header border-0 py-3 text-white"
-                                    style={{ background: 'linear-gradient(90deg, #7584a0 0%, #4a5f83 100%)' }}
+            <Box sx={{ bgcolor: "#f8efe8", minHeight: "100vh" }}>
+                <Container maxWidth="lg" sx={{ py: 2, height: "100%" }}>
+                    {/* Back Button */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start", // Change to "center" if you want the whole row centered
+                            gap: 3,                       // Adds space between the button and text
+                            mb: 4,                        // Bottom margin for the whole row
+                            px: { xs: 2, md: 0 }          // Responsive padding
+                        }}
+                    >
+                        {/* 🔙 Back Button */}
+                        <button
+                            onClick={() => navigate("/")}
+                            className="btn shadow-sm d-flex align-items-center justify-content-center"
+                            style={{
+                                backgroundColor: '#e67e22',
+                                color: "white",
+                                width: "48px",
+                                height: "48px",
+                                borderRadius: "12px",
+                                border: "none",
+                                transition: "0.3s",
+                                marginLeft: "3%"
+                            }}
+                        >
+                            <i className="fa fa-arrow-left"></i>
+                        </button>
+
+                        {/* 📝 Heading */}
+                        <h2
+                            className="fw-bold m-0"
+                            style={{
+                                color: "black",
+                                letterSpacing: "-0.5px",
+                                fontSize: "2rem",
+                                lineHeight: 1 // Ensures the text aligns perfectly with the button height
+                            }}
+                        >
+                            Check all the details
+                        </h2>
+                    </Box>
+
+                    <Grid container
+                        spacing={4}
+                        justifyContent="center"
+                        sx={{
+                            height: "calc(100vh - 120px)" 
+                        }}>
+                        {/* LEFT SIDE: Summaries and Forms */}
+                        <Grid item xs={12} md={7}>
+
+                            {/* 1️⃣ Journey Summary Card */}
+                            {businfo && (
+                                <Card
+                                    sx={{
+                                        mb: 4,
+                                        borderRadius: 4,
+                                        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+                                        border: "1px solid #ebb96f",
+                                        overflow: "hidden",
+                                        background: "#fff",
+                                        transition: "all 0.3s ease",
+                                        "&:hover": {
+                                            boxShadow: "0 15px 35px rgba(0, 0, 0, 0.12)",
+                                            borderColor: "#e67e22"
+                                        }
+                                    }}
                                 >
-                                    <div className="d-flex justify-content-between align-items-center px-2">
-                                        <h6 className="mb-0 fw-bold text-uppercase">
-                                            <i className="bi bi-geo-alt-fill me-2"></i>Journey Summary
-                                        </h6>
-                                        <span className="badge bg-white text-primary rounded-pill px-3 shadow-sm">Verified Route</span>
-                                    </div>
-                                </div>
-
-                                <div className="card-body p-0">
-                                    <div className="p-4 bg-white">
-                                        <div className="row align-items-center">
-                                            <div className="col-md-4 mb-3 mb-md-0 border-end-md">
-                                                <small className="text-muted text-uppercase fw-bold">Operator</small>
-                                                <h3 className="fw-black text-dark mb-1">{businfo.bus_name}</h3>
-                                                <span className="text-primary small fw-semibold">
-                                                    <i className="bi bi-stars me-1"></i> {businfo.features}
-                                                </span>
-                                            </div>
-
-                                            <div className="col-md-8">
-                                                <div className="d-flex justify-content-between align-items-center px-lg-3">
-                                                    <div className="text-center">
-                                                        <div className="h2 fw-black text-primary mb-0">{businfo.start_time}</div>
-                                                        <div className="fw-bold text-dark">{businfo.starting_point}</div>
-                                                        <div className="text-muted small text-uppercase">Departure</div>
-                                                    </div>
-                                                    <div className="flex-grow-1 mx-3 position-relative d-none d-sm-block">
-                                                        <div className="border-bottom border-2 border-dashed border-secondary w-100 opacity-25"></div>
-                                                        <div className="position-absolute top-50 start-50 translate-middle bg-white px-2">
-                                                            <div className="bg-light p-2 rounded-circle shadow-sm border">
-                                                                <i className="bi bi-bus-front-fill text-primary"></i>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <div className="h2 fw-black text-primary mb-0">{businfo.reach_time}</div>
-                                                        <div className="fw-bold text-dark">{businfo.ending_points}</div>
-                                                        <div className="text-muted small text-uppercase">Arrival</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-light border-top border-2 border-dashed p-3 px-4">
-                                        <div className="row g-2">
-                                            <div className="col-sm-4 d-flex align-items-center">
-                                                <div className="bg-white p-2 rounded-3 me-2 shadow-sm">
-                                                    <i className="bi bi-pin-map text-danger"></i>
-                                                </div>
-                                                <div>
-                                                    <div className="text-muted small fw-bold text-uppercase">Origin</div>
-                                                    <div className="small fw-bold">{businfo.starting_point}</div>
-                                                </div>
-                                            </div>
-                                            <div className="col-sm-4 d-flex align-items-center">
-                                                <div className="bg-white p-2 rounded-3 me-2 shadow-sm">
-                                                    <i className="bi bi-flag-fill text-success"></i>
-                                                </div>
-                                                <div>
-                                                    <div className="text-muted small fw-bold text-uppercase">Destination</div>
-                                                    <div className="small fw-bold">{businfo.ending_points}</div>
-                                                </div>
-                                            </div>
-                                            <div className="col-sm-4 d-flex align-items-center">
-                                                <div className="bg-white p-2 rounded-3 me-2 shadow-sm">
-                                                    <i className="bi bi-shield-check text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <div className="text-muted small fw-bold text-uppercase">Service</div>
-                                                    <div className="small fw-bold">{businfo.features}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Traveler Form */}
-                        <div className="card border-0 shadow-sm">
-                            <div className="card-header bg-white py-3">
-                                <h5 className="mb-0 fw-bold">Traveler Information</h5>
-                            </div>
-                            <div className="card-body p-4">
-                                {!submitted && travelers.map((traveler, index) => (
-                                    <div key={index} className="p-4 mb-3 border rounded-3 bg-white">
-                                        <h6 className="text-primary fw-bold mb-3">
-                                            Passenger {index + 1}
-                                            {selectedSeatNos && <span className="text-muted fw-normal ms-2">(Seat: {selectedSeatNos[index]})</span>}
-                                        </h6>
-                                        <div className="row g-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold">Full Name</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-lg border-2"
-                                                    placeholder="Passenger name"
-                                                    value={traveler.name}
-                                                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold">Age</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control form-control-lg border-2"
-                                                    placeholder="Age"
-                                                    value={traveler.age}
-                                                    onChange={(e) => handleInputChange(index, "age", e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold">Gender</label>
-                                                <select
-                                                    className="form-select form-select-lg border-2"
-                                                    value={traveler.gender}
-                                                    onChange={(e) => handleInputChange(index, "gender", e.target.value)}
-                                                >
-                                                    <option value="">Select</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {!submitted && (
-                                    <div className="col-md-3 mt-3">
-                                        <button className="btn custom-btn-brown btn-lg w-100 fw-bold shadow-sm" onClick={() => setSubmitted(true)}>
-                                            Submit
-                                        </button>
-                                    </div>
-                                )}
-
-                                {submitted && travelers.map((traveler, index) => (
-                                    <div key={index} className="passenger-box p-3 mb-3 border border-2 rounded-4 shadow-sm bg-white mt-4">
-                                        <div className="row align-items-center">
-                                            <div className="col-md-5 d-flex align-items-center">
-                                                <div className="bg-brown-light p-2 rounded-circle me-3">
-                                                    <i className="bi bi-person-fill text-brown"></i>
-                                                </div>
-                                                <div>
-                                                    <p className="text-muted small text-uppercase mb-0 fw-bold">Passenger Name</p>
-                                                    <h6 className="fw-bold mb-0 text-dark">{traveler.name || "Not Provided"}</h6>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-3 border-start">
-                                                <p className="text-muted small text-uppercase mb-0 fw-bold">Age</p>
-                                                <h6 className="fw-bold mb-0">{traveler.age || "N/A"} Years</h6>
-                                            </div>
-                                            <div className="col-md-4 border-start d-flex align-items-center justify-content-between">
-                                                <span className={`badge rounded-pill ${traveler.gender === 'Male' ? 'bg-primary' : 'bg-info'} px-3`}>
-                                                    {traveler.gender || "N/A"}
-                                                </span>
-                                                <button className="btn btn-sm btn-outline-warning ms-2" onClick={() => setSubmitted(false)}>
-                                                    <i className="fa-solid fa-pen-to-square"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                <button
-                                    className="btn btn-primary btn-lg w-100 py-3 mt-3 fw-bold shadow"
-                                    onClick={handleProceedToPayment}
-                                    disabled={!submitted}
-                                >
-                                    Proceed to Secure Payment
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column: Price & Coupons */}
-                    <div className="col-lg-4">
-                        <div className="card border-0 shadow-sm mb-4">
-                            <div className="card-header bg-dark text-white py-3">
-                                <h5 className="mb-0">Fare Summary</h5>
-                            </div>
-                            <div className="card-body p-4">
-                                <div className="d-flex justify-content-between mb-2">
-                                    <span>Seats</span>
-                                    <span className="fw-bold">{selectedSeatNos?.join(", ")}</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-2">
-                                    <span>Base Fare</span>
-                                    <span className="fw-bold">₹{Price}</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-2">
-                                    <span>Tax & Fees</span>
-                                    <span className="fw-bold">₹10.00</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-2">
-                                    <label>Coupon:</label>
-                                    <input
-                                        type="text"
-                                        style={{ width: "10em" }}
-                                        className="form-control"
-                                        value={couponInput}
-                                        placeholder="Coupon code"
-                                        onChange={(e) => setCouponInput(e.target.value)}
-                                    />
-                                </div>
-                                {appliedCoupon && (
-                                    <div className="d-flex justify-content-between mb-2 text-success">
-                                        <span>Discount</span>
-                                        <span className="fw-bold">- ₹{appliedCoupon.amount}</span>
-                                    </div>
-                                )}
-                                <hr />
-                                <div className="d-flex justify-content-between">
-                                    <h5 className="fw-bold text-success">Total Amount</h5>
-                                    <h5 className="fw-bold text-success">₹{finalPrice}</h5>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Coupons */}
-                        <div className="card border-0 shadow-sm">
-                            <div className="card-header bg-warning text-dark py-3">
-                                <h5 className="mb-0 fw-bold">Offers & Coupons</h5>
-                            </div>
-                            <div className="card-body p-4">
-                                {coupons.length > 0 ? (
-                                    coupons.map((coupon) => (
-                                        <div key={coupon.id} className="p-3 mb-3 border border-dashed rounded-3 bg-light d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <div className="fw-bold text-dark">{coupon.name}</div>
-                                                <div className="text-success small">{coupon.Couponcode}</div>
-                                            </div>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary fw-bold"
-                                                onClick={() => copyToClipboard(coupon.Couponcode)}
+                                    <CardContent sx={{ p: 4 }}>
+                                        {/* Header: Label and Dynamic Status */}
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                                            <Typography
+                                                variant="overline"
+                                                fontWeight="800"
+                                                sx={{ letterSpacing: "1.5px", color: "#888", fontSize: "0.75rem" }}
                                             >
-                                                COPY
-                                            </button>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-muted text-center mb-0">No offers today.</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                                Journey Summary
+                                            </Typography>
+                                            <Chip
+                                                label="Instant Booking"
+                                                size="small"
+                                                icon={<LocalOffer style={{ fontSize: '14px', color: '#e67e22' }} />}
+                                                sx={{ bgcolor: "#fff3e0", color: "#e67e22", fontWeight: "bold", border: "1px solid #ffe0b2" }}
+                                            />
+                                        </Stack>
+
+                                        <Grid container spacing={4} alignItems="center">
+                                            {/* Left Side: Bus Identity */}
+                                            <Grid item xs={12} md={5}>
+                                                <Typography
+                                                    variant="h4"
+                                                    fontWeight="800"
+                                                    sx={{ color: "#e67e22", mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                                                >
+                                                    {businfo.bus_name}
+                                                </Typography>
+                                                <Typography variant="body1" color="text.secondary" sx={{ opacity: 0.8, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <BusAlert sx={{ fontSize: 18 }} /> {businfo.features}
+                                                </Typography>
+                                            </Grid>
+
+                                            {/* Right Side: Timeline and Route */}
+                                            <Grid item xs={12} md={7} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                                                <Typography variant="h4" fontWeight="800" color="#2c3e50">
+                                                    {businfo.start_time} <span style={{ color: "#bdc3c7", fontWeight: 300 }}>—</span> {businfo.reach_time}
+                                                </Typography>
+
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={1}
+                                                    justifyContent={{ xs: "flex-start", md: "flex-end" }}
+                                                    alignItems="center"
+                                                    mt={1}
+                                                >
+                                                    <Typography variant="h6" fontWeight="600" color="#34495e">
+                                                        {businfo.starting_point}
+                                                    </Typography>
+                                                    <Typography sx={{ color: "#e67e22", fontWeight: "bold" }}>→</Typography>
+                                                    <Typography variant="h6" fontWeight="600" color="#34495e">
+                                                        {businfo.ending_points}
+                                                    </Typography>
+                                                </Stack>
+                                            </Grid>
+                                        </Grid>
+
+                                        <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
+
+                                        {/* Bottom Footer: More Details */}
+                                        <Grid container justifyContent="space-between" alignItems="center">
+                                            <Grid item>
+                                                <Stack direction="row" spacing={3}>
+                                                    <Box>
+                                                        <Typography variant="caption" display="block" color="text.secondary" gutterBottom>
+                                                            DURATION
+                                                        </Typography>
+                                                        <Typography variant="body2" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                            <Timer sx={{ fontSize: 16, color: '#7f8c8d' }} /> {businfo.duration || "6h 30m"}
+                                                        </Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+
+                                            <Grid item>
+                                                <Typography variant="caption" display="block" color="text.secondary" textAlign="right">
+                                                    PER PASSENGER
+                                                </Typography>
+                                                <Typography variant="h5" fontWeight="900" color="#27ae60">
+                                                    ₹{businfo.price || "850"}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* 2️⃣ Traveler Card */}
+                            <Card sx={{ borderRadius: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.08)", border: "1px solid #f0f0f0" }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                                        <Typography variant="h6" fontWeight="800" sx={{ color: "#2c3e50" }}>
+                                            Traveler Details
+                                        </Typography>
+                                        <Chip
+                                            label={`${travelers.length} Passenger${travelers.length > 1 ? 's' : ''}`}
+                                            size="small"
+                                            sx={{ fontWeight: "bold", bgcolor: "#f8f9fa" }}
+                                        />
+                                    </Stack>
+
+                                    {!submitted ? (
+                                        <Fade in={!submitted}>
+                                            <Box>
+                                                {travelers.map((traveler, index) => (
+                                                    <Box
+                                                        key={index}
+                                                        sx={{
+                                                            mb: 3,
+                                                            p: 3,
+                                                            bgcolor: "#fff",
+                                                            border: "1px solid #e0e0e0",
+                                                            borderRadius: 3,
+                                                            position: 'relative',
+                                                            transition: "0.3s",
+                                                            "&:hover": { borderColor: "#e67e22" }
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="caption"
+                                                            sx={{
+                                                                position: 'absolute',
+                                                                top: -10,
+                                                                left: 20,
+                                                                bgcolor: "#e67e22",
+                                                                color: "white",
+                                                                px: 1.5,
+                                                                borderRadius: 1,
+                                                                fontWeight: "bold"
+                                                            }}
+                                                        >
+                                                            SEAT {selectedSeatNos?.[index]}
+                                                        </Typography>
+
+                                                        <Grid container spacing={2} mt={0.5}>
+                                                            <Grid item xs={12} sm={6}>
+                                                                <TextField
+                                                                    fullWidth
+                                                                    label="Full Name"
+                                                                    placeholder="As per Govt. ID"
+                                                                    value={traveler.name}
+                                                                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
+                                                                    InputProps={{
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <Person sx={{ color: "#bdc3c7" }} />
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={6} sm={3}>
+                                                                <TextField
+                                                                    fullWidth
+                                                                    type="number"
+                                                                    label="Age"
+                                                                    value={traveler.age}
+                                                                    onChange={(e) => handleInputChange(index, "age", e.target.value)}
+                                                                    InputProps={{
+                                                                        startAdornment: <InputAdornment position="start"><Badge sx={{ color: "#bdc3c7", fontSize: 20 }} /></InputAdornment>,
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={6} sm={3}>
+                                                                <TextField
+                                                                    select
+                                                                    fullWidth
+                                                                    label="Gender"
+                                                                    value={traveler.gender}
+                                                                    onChange={(e) => handleInputChange(index, "gender", e.target.value)}
+                                                                    InputProps={{
+                                                                        startAdornment: <InputAdornment position="start"><Transgender sx={{ color: "#bdc3c7", fontSize: 20 }} /></InputAdornment>,
+                                                                    }}
+                                                                    SelectProps={{ native: true }} // Faster for mobile users
+                                                                >
+                                                                    <option value="Male" >Male</option>
+                                                                    <option value="Female">Female</option>
+                                                                    <option value="Other">Other</option>
+                                                                </TextField>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                ))}
+
+                                                <Button
+                                                    variant="contained"
+                                                    fullWidth
+                                                    size="large"
+                                                    onClick={() => setSubmitted(true)}
+                                                    sx={{
+                                                        mt: 2,
+                                                        py: 2,
+                                                        borderRadius: 3,
+                                                        fontWeight: '800',
+                                                        bgcolor: "#e67e22",
+                                                        "&:hover": { bgcolor: "#e98731" }
+                                                    }}
+                                                >
+                                                    Review & Confirm
+                                                </Button>
+                                            </Box>
+                                        </Fade>
+                                    ) : (
+                                        <Fade in={submitted}>
+                                            <Box>
+                                                {travelers.map((t, i) => (
+                                                    <Box
+                                                        key={i}
+                                                        sx={{
+                                                            mb: 2,
+                                                            p: 2.5,
+                                                            border: "1px dashed #27ae60",
+                                                            bgcolor: "#fafffb",
+                                                            borderRadius: 3,
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center'
+                                                        }}
+                                                    >
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <CheckCircle sx={{ color: "#27ae60" }} />
+                                                            <Box>
+                                                                <Typography fontWeight="bold" sx={{ color: "#2c3e50" }}>{t.name}</Typography>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {t.age} yrs • {t.gender} • <strong>Seat {selectedSeatNos?.[i]}</strong>
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+                                                        <IconButton onClick={() => setSubmitted(false)} size="small">
+                                                            <Edit sx={{ fontSize: 18, color: "#7f8c8d" }} />
+                                                        </IconButton>
+                                                    </Box>
+                                                ))}
+
+                                                <Button
+                                                    variant="contained"
+                                                    color="success"
+                                                    fullWidth
+                                                    size="large"
+                                                    onClick={handleProceedToPayment}
+                                                    sx={{
+                                                        mt: 2,
+                                                        py: 2,
+                                                        borderRadius: 3,
+                                                        fontWeight: '800',
+                                                        boxShadow: "0 6px 20px rgba(39, 174, 96, 0.3)"
+                                                    }}
+                                                >
+                                                    Proceed to Payment
+                                                </Button>
+                                            </Box>
+                                        </Fade>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid>
+
+                        {/* RIGHT SIDE: Fare and Offers */}
+                        <Grid item xs={12} md={4}>
+                            {/* 3️⃣ Fare Card - Refined for "Receipt" feel */}
+                            <Card sx={{
+                                borderRadius: 4,
+                                mb: 2,
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+                                border: "1px solid #363636",
+                                overflow: 'visible'
+                            }}>
+                                <CardContent sx={{ p: 3 }}>
+                                    <Typography variant="h6" fontWeight="800" mb={3} color="text.primary">
+                                        Fare Summary
+                                    </Typography>
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        <Box display="flex" justifyContent="space-between">
+                                            <Typography color="text.secondary">Seats Selected</Typography>
+                                            <Typography fontWeight="700">{selectedSeatNos?.length > 0 ? selectedSeatNos.join(", ") : "—"}</Typography>
+                                        </Box>
+
+                                        <Box display="flex" justifyContent="space-between">
+                                            <Typography color="text.secondary">Base Fare</Typography>
+                                            <Typography fontWeight="700">₹{Price}</Typography>
+                                        </Box>
+
+                                        <Box display="flex" justifyContent="space-between">
+                                            <Typography color="text.secondary">Taxes & Fees</Typography>
+                                            <Typography fontWeight="700" color="success.main">Free</Typography>
+                                        </Box>
+
+                                        {/* Coupon Input Area */}
+                                        <Box sx={{ mt: 1 }}>
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                label="Have a Coupon?"
+                                                placeholder="Enter code"
+                                                value={couponInput}
+                                                onChange={(e) => setCouponInput(e.target.value)}
+                                                InputProps={{
+                                                    sx: { borderRadius: 2, bgcolor: '#f9f9f9' }
+                                                }}
+                                            />
+                                        </Box>
+
+                                        {appliedCoupon && (
+                                            <Box
+                                                display="flex"
+                                                justifyContent="space-between"
+                                                sx={{
+                                                    p: 1.5,
+                                                    bgcolor: "success.lighter",
+                                                    borderRadius: 2,
+                                                    border: "1px dashed",
+                                                    borderColor: "success.main",
+                                                    animation: "fadeIn 0.5s ease-in"
+                                                }}
+                                            >
+                                                <Box>
+                                                    <Typography variant="caption" display="block" color="success.dark" fontWeight="bold">COUPON APPLIED</Typography>
+                                                    <Typography variant="body2" color="success.dark">{appliedCoupon.Couponcode}</Typography>
+                                                </Box>
+                                                <Typography fontWeight="bold" color="success.dark">-₹{appliedCoupon.amount}</Typography>
+                                            </Box>
+                                        )}
+
+                                        <Divider sx={{ my: 1, borderStyle: 'dashed', borderWidth: 1 }} />
+
+                                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                                            <Box>
+                                                <Typography variant="subtitle2" color="text.secondary">Total Payable</Typography>
+                                                <Typography variant="h5" fontWeight="900" color="primary.main">
+                                                    ₹{finalPrice}
+                                                </Typography>
+                                            </Box>
+
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+
+                            <Card sx={{
+                                height: 380,
+                                display: "flex",
+                                flexDirection: "column",
+                                borderRadius: 4,
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+                                border: "1px solid #f0f0f0"
+                            }}>
+                                <Box sx={{
+                                    p: 2,
+                                    background:"#db9252",
+                                    color: "#000",
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1
+                                }}>
+                                    <Typography variant="subtitle1" fontWeight="800">Available Offers</Typography>
+                                </Box>
+
+                                <CardContent sx={{
+                                    overflowY: "auto",
+                                    flex: 1,
+                                    p: 2,
+                                    bgcolor: "#fff",
+                                    '&::-webkit-scrollbar': { width: '4px' },
+                                    '&::-webkit-scrollbar-thumb': { bgcolor: '#e0e0e0', borderRadius: '10px' }
+                                }}>
+                                    {coupons.map((coupon) => (
+                                        <Box
+                                            key={coupon.id}
+                                            sx={{
+                                                p: 2,
+                                                mb: 2,
+                                                position: 'relative',
+                                                border: "1.5px solid #f0f0f0",
+                                                borderRadius: 3,
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                transition: "all 0.2s ease",
+                                                "&:hover": {
+                                                    borderColor: "primary.main",
+                                                    transform: "translateY(-2px)",
+                                                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+                                                }
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography
+                                                    variant="overline"
+                                                    fontWeight="900"
+                                                    sx={{ color: 'primary.main', letterSpacing: 1 }}
+                                                >
+                                                    {coupon.Couponcode}
+                                                </Typography>
+                                                <Typography variant="body2" fontWeight="700" color="text.primary">
+                                                    Save ₹{coupon.amount}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    On your current booking
+                                                </Typography>
+                                            </Box>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                disableElevation
+                                                onClick={() => copyToClipboard(coupon.Couponcode)}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform: 'none',
+                                                    fontWeight: 'bold',
+                                                    height: 32,
+                                                    minWidth: 60
+                                                }}
+                                            >
+                                                Copy
+                                            </Button>
+                                        </Box>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </Grid>
+                </Container>
+            </Box>
+        </>
     );
 }
 

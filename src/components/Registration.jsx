@@ -3,29 +3,19 @@ import { useForm } from "react-hook-form";
 import axios from "axios"; // Added Axios import
 import {
   Box, Paper, Typography, TextField, Button,
-  IconButton, InputAdornment, Fade, Divider, CircularProgress
+  IconButton, InputAdornment, Fade, Divider, CircularProgress,Stack
 } from "@mui/material";
 import taj from "../assets/taj.jpg";
-
+import "../css/Registration.css"
 const internalStyles = {
   leftPanel: {
     width: "45%",
     p: 6,
-    background: "#aac7e2",
+    background: "#ffffff",
+    backdropFilter: "blur(20px)",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
-  },
-  inputField: {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      marginTop: "10px",
-      backgroundColor: "#f8fafc",
-      "& fieldset": { border: "none" },
-      "&:hover fieldset": { border: "none" },
-      "&.Mui-focused fieldset": { border: "1.5px solid #6366f1" },
-    },
-    mb: 0.5,
+    color: "#1e293b",
   },
   errorText: {
     color: "#ef4444",
@@ -90,8 +80,8 @@ function Registration({ onClose, openLogin }) {
 
           {/* LEFT SIDE */}
           <Box sx={internalStyles.leftPanel}>
-            <Typography variant="overline" sx={{ color: "#6366f1", fontWeight: 900, letterSpacing: 1.5 }}>
-              TRIPORA TRAVELS
+            <Typography variant="overline" sx={{ color: "#f1a863", fontWeight: 900, letterSpacing: 1.5 }}>
+              Bus Booking
             </Typography>
 
             <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a", mt: 1 }}>
@@ -102,73 +92,80 @@ function Registration({ onClose, openLogin }) {
               Join us to discover the hidden gems of India.
             </Typography>
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 2 }}>
-              <TextField
-                fullWidth size="small" placeholder="Full Name"
-                sx={internalStyles.inputField}
-                {...register("username", { required: "Username is required" })}
-                error={!!errors.username}
-              />
-              {errors.username && <Typography sx={internalStyles.errorText}>{errors.username.message}</Typography>}
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {/* Using Stack to create 24px (spacing={3}) gaps between elements */}
+              <Stack spacing={2.5}>
 
-              <TextField
-                fullWidth size="small" placeholder="Email Address"
-                sx={internalStyles.inputField}
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email" }
-                })}
-                error={!!errors.email}
-              />
-              {errors.email && <Typography sx={internalStyles.errorText}>{errors.email.message}</Typography>}
+                <Box>
+                  <TextField className="regist-input"
+                    fullWidth size="small" placeholder="Full Name"
+                    {...register("username", { required: "Username is required" })}
+                    error={!!errors.username}
+                  />
+                  {errors.username && <Typography sx={internalStyles.errorText}>{errors.username.message}</Typography>}
+                </Box>
 
-              <TextField
-                fullWidth size="small" type={showPass ? "text" : "password"} placeholder="Password"
-                sx={internalStyles.inputField}
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: { value: 8, message: "Use 8+ characters" }
-                })}
-                error={!!errors.password}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPass(!showPass)} size="small">
-                        <i className={`fa-solid ${showPass ? "fa-eye-slash" : "fa-eye"}`} style={{ color: '#94a3b8', fontSize: '1rem' }} />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
-              {errors.password && <Typography sx={internalStyles.errorText}>{errors.password.message}</Typography>}
+                <Box>
+                  <TextField className="regist-input"
+                    fullWidth size="small" placeholder="Email Address"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email" }
+                    })}
+                    error={!!errors.email}
+                  />
+                  {errors.email && <Typography sx={internalStyles.errorText}>{errors.email.message}</Typography>}
+                </Box>
 
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                disabled={isSubmitting}
-                sx={{
-                  py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
-                  textTransform: "none", fontSize: "1rem",
-                  bgcolor: "#6366f1",
-                  '&:hover': { bgcolor: '#4f46e5' }
-                }}
-              >
-                {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
-              </Button>
+                <Box>
+                  <TextField className="regist-input"
+                    fullWidth size="small" type={showPass ? "text" : "password"} placeholder="Password"
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: { value: 8, message: "Use 8+ characters" }
+                    })}
+                    error={!!errors.password}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPass(!showPass)} size="small">
+                            <i className={`fa-solid ${showPass ? "fa-eye-slash" : "fa-eye"}`} style={{ color: '#94a3b8', fontSize: '1rem' }} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                  {errors.password && <Typography sx={internalStyles.errorText}>{errors.password.message}</Typography>}
+                </Box>
+
+                <Button
+                  fullWidth
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={{
+                    py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
+                    textTransform: "none", fontSize: "1rem",
+                    bgcolor: "#f1b47bf6",
+                    '&:hover': { bgcolor: '#f8aa61f6' }
+                  }}
+                >
+                  {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
+                </Button>
+              </Stack>
             </form>
 
             <Divider sx={{ my: 3 }}>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: "#1b1b1b", fontWeight: 600 }}>
                 OR
               </Typography>
             </Divider>
 
             <Box display="flex" gap={2}>
-              <Button fullWidth variant="outlined">
+              <Button fullWidth variant="outlined" sx={{color:"black",borderColor:'black',borderRadius:2}} >
                 <i className="fa-brands fa-google" style={{ marginRight: 8 }} /> Google
               </Button>
-              <Button fullWidth variant="outlined">
+              <Button fullWidth variant="outlined" sx={{color:"black",borderColor:'black',borderRadius:2}}>
                 <i className="fa-brands fa-apple" style={{ marginRight: 8 }} /> Apple
               </Button>
             </Box>
@@ -184,16 +181,16 @@ function Registration({ onClose, openLogin }) {
                   }, 800);
                 }}
                 style={{
-                  color: "#6366f1",
+                  color: "#a8a19af6",
                   cursor: "pointer",
-                  fontWeight: 800,
+                  fontWeight: 600,
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px"
                 }}
               >
                 {isSwitching ? (
-                  <CircularProgress size={14} sx={{ color: "#6366f1" }} />
+                  <CircularProgress size={14} sx={{ color: "#dd9e63" }} />
                 ) : (
                   "Login here"
                 )}
