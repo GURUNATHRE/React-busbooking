@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios"; // Added Axios import
 import {
   Box, Paper, Typography, TextField, Button,
   IconButton, InputAdornment, Fade, Divider, CircularProgress
@@ -48,12 +49,35 @@ function Registration({ onClose, openLogin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({ mode: "onBlur" });
+  // Added setError to handle API response errors
+  const { register, handleSubmit, formState: { errors }, setError } = useForm({ mode: "onBlur" });
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      console.log("Registering:", data);
+      // POST request to your registration API
+      const response = await axios.post("register/", {
+        username: data.username,
+        email: data.email,
+        password: data.password
+      }, {
+        headers: { "Content-Type": "application/json" }
+      });
+
+      console.log("Registering Success:", response.data);
+      alert("Account created successfully!");
+      openLogin(); // Switch to login view after success
+
+    } catch (error) {
+      console.error("Registration Error:", error.response?.data);
+
+      // Map backend errors to the form fields
+      const apiErrors = error.response?.data;
+      if (apiErrors) {
+        if (apiErrors.username) setError("username", { type: "manual", message: apiErrors.username[0] });
+        if (apiErrors.email) setError("email", { type: "manual", message: apiErrors.email[0] });
+        if (apiErrors.password) setError("password", { type: "manual", message: apiErrors.password[0] });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +173,6 @@ function Registration({ onClose, openLogin }) {
               </Button>
             </Box>
 
-            {/* ✅ FIXED LOADER */}
             <Typography variant="body2" align="center" sx={{ mt: 4, color: "#64748b" }}>
               Already a member?{" "}
               <span

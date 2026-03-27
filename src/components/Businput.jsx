@@ -105,6 +105,7 @@ function Businput({ onLoginClick }) {
                 autoHideDuration={4000}
                 onClose={handleCloseAlert}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                sx={{ top: { xs: '70px', sm: '74px' } }}
             >
                 <Alert
                     onClose={handleCloseAlert}
@@ -216,7 +217,24 @@ function Businput({ onLoginClick }) {
                                 </Grid>
                                 <Grid item xs={12} md={3}>
                                     <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary', ml: 1, mb: 1, display: 'block' }}>JOURNEY DATE</Typography>
-                                    <TextField sx={{ borderRadius: 30 }} type="date" fullWidth value={date} onChange={(e) => setDate(e.target.value)} />
+                                    <TextField
+                                        type="date"
+                                        fullWidth
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        size="small"
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": {
+                                                height: "60px",
+                                                width: "12vw", // Matches your From/To width
+                                                fontSize: "1rem",
+                                                borderRadius: "10px"
+                                            },
+                                            "& input": {
+                                                padding: "14px" // Ensures text is vertically centered
+                                            }
+                                        }}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={2}>
                                     <Button

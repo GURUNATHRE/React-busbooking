@@ -105,7 +105,7 @@ function ResetPasswordChild({ email }) {
           <Button
             variant="contained"
             fullWidth
-            
+
             onClick={handleNavigate} // navigate on click
           >
             login

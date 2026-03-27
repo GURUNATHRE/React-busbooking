@@ -35,7 +35,7 @@ function App() {
         <Route path="/bus/:id/journeydetails/payment" element={<Carddetails />} />
       </Routes>
 
-      {/* 🔥 LOGIN MODAL */}
+
       {openLogin && (
         <Login
           onClose={() => setOpenLogin(false)}
@@ -46,7 +46,6 @@ function App() {
         />
       )}
 
-      {/* 🔥 REGISTER MODAL */}
       {openRegister && (
         <Registration
           onClose={() => setOpenRegister(false)}

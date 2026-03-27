@@ -1,5 +1,7 @@
 .bus-page {
-  background-color: rgb(155, 154, 153);
+  background-image: url("../assets/allbus.jpg");
+  background-size: cover;
+  background-position: center;
   height: 100vh;
 }
 .bus-card {

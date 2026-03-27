@@ -5,7 +5,7 @@ import App from './App.jsx'
 import {BrowserRouter} from 'react-router-dom';
 import axios from "axios";
 
-// set base URL
+// set base URL   
 axios.defaults.baseURL = "http://127.0.0.1:8000/list/";
 
 // add token automatically

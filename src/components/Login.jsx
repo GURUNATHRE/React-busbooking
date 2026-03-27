@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import {
   Box, Paper, Typography, TextField, Button,
-  IconButton, InputAdornment, Fade, Checkbox, FormControlLabel, CircularProgress,Divider
+  IconButton, InputAdornment, Fade, Checkbox, FormControlLabel, CircularProgress, Divider
 } from "@mui/material";
 import bus from "../assets/bus.jpg";
 import "../css/Login.css";
@@ -108,12 +108,19 @@ function Login({ onClose, openRegister }) {
             <form onSubmit={handleSubmit(onSubmit)}>
 
               {/* EMAIL */}
+              {/* EMAIL */}
               <TextField
                 fullWidth
                 size="small"
                 placeholder="Email Address"
                 className="login-input"
-                {...register("email", { required: "Email is required" })}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Please enter a valid email address"
+                  }
+                })}
                 error={!!errors.email}
                 sx={{ mb: errors.email ? 0.5 : 2 }}
               />
@@ -130,9 +137,13 @@ function Login({ onClose, openRegister }) {
                 type={showPass ? "text" : "password"}
                 placeholder="Password"
                 className="login-input"
-                {...register("password", { required: "Password is required" })}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 6, message: "Password must be at least 6 characters" },
+                  onChange: () => setServerError("") // Clear server error when user types
+                })}
                 error={!!errors.password || !!serverError}
-                sx={{ mb: 2 }}
+                sx={{ mb: (errors.password || serverError) ? 0.5 : 2 }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -157,7 +168,7 @@ function Login({ onClose, openRegister }) {
             </form>
 
 
-            <Divider sx={{ mt:3}}>
+            <Divider sx={{ mt: 3 }}>
               <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600 }}>
                 OR
               </Typography>

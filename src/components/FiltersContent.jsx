@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function FiltersContent({onApplyFilters}) {
+function FiltersContent({ onApplyFilters }) {
   const [filters, setFilters] = useState({
     minPrice: "",
     maxPrice: "",
@@ -16,7 +16,6 @@ function FiltersContent({onApplyFilters}) {
   // Handle checkbox change
   const handleBusTypeChange = (e) => {
     const { value, checked } = e.target;
-
     if (checked) {
       setFilters({
         ...filters,
@@ -38,89 +37,117 @@ function FiltersContent({onApplyFilters}) {
 
   // Clear all filters
   const handleClear = () => {
-    setFilters({
+    const cleared = {
       minPrice: "",
       maxPrice: "",
       busTypes: [],
-    });
-    console.log("clearing the details ",filters)
-
-    onApplyFilters({
-      minPrice: "",
-      maxPrice: "",
-      busTypes: [],
-    });
+    };
+    setFilters(cleared);
+    console.log("clearing the details ", cleared);
+    onApplyFilters(cleared);
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold m-0">Filters</h5>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h5 className="fw-bold m-0 text-dark">Filters</h5>
         <button
           type="button"
           onClick={handleClear}
           className="btn btn-link btn-sm text-danger p-0 text-decoration-none fw-bold"
+          style={{ fontSize: "0.8rem" }}
         >
           CLEAR ALL
         </button>
       </div>
 
-      <hr />
+      <hr style={{ opacity: "0.1" }} />
 
       {/* Price Range */}
       <div className="mb-4">
-        <p className="small fw-bold text-uppercase text-muted mb-3">
-          Price Range
+        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "0.75rem" }}>
+          Price Range (₹)
         </p>
 
-        <div className="mb-3">
-          <label className="form-label small">Starting Price</label>
-          <input
-            type="number"
-            name="minPrice"
-            value={filters.minPrice}
-            onChange={handlePriceChange}
-            className="form-control form-control-sm"
-            placeholder="₹100"
-          />
-        </div>
-
-        <div>
-          <label className="form-label small">Maximum Price</label>
-          <input
-            type="number"
-            name="maxPrice"
-            value={filters.maxPrice}
-            onChange={handlePriceChange}
-            className="form-control form-control-sm"
-            placeholder="₹1000"
-          />
+        <div className="row g-2">
+          <div className="col-6">
+            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem" }}>Starting</label>
+            <input
+              type="number"
+              name="minPrice"
+              value={filters.minPrice}
+              onChange={handlePriceChange}
+              className="form-control form-control-sm border-0 bg-light"
+              placeholder="₹100"
+              style={{ borderRadius: "8px", padding: "10px" }}
+            />
+          </div>
+          <div className="col-6">
+            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem" }}>Maximum</label>
+            <input
+              type="number"
+              name="maxPrice"
+              value={filters.maxPrice}
+              onChange={handlePriceChange}
+              className="form-control form-control-sm border-0 bg-light"
+              placeholder="₹1000"
+              style={{ borderRadius: "8px", padding: "10px" }}
+            />
+          </div>
         </div>
       </div>
 
-      <hr />
+      <hr style={{ opacity: "0.1" }} />
 
       {/* Bus Type */}
       <div className="mb-4">
-        <p className="small fw-bold text-uppercase text-muted mb-2">
+        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "0.75rem" }}>
           Bus Type
         </p>
 
-        {["Ac sleeper", "Non AC", "Sleeper", "Seater"].map((type) => (
-          <div className="form-check mb-2" key={type}>
-            <input
-              className="form-check-input"
-              type="checkbox"
-              value={type}
-              checked={filters.busTypes.includes(type)}
-              onChange={handleBusTypeChange}
-            />
-            <label className="form-check-label small">{type}</label>
-          </div>
-        ))}
+        <div className="d-flex flex-column gap-1">
+          {["Ac sleeper", "Non AC", "Sleeper", "Seater"].map((type) => (
+            <div 
+              className="form-check p-2" 
+              key={type}
+              style={{ 
+                borderRadius: "8px", 
+                backgroundColor: filters.busTypes.includes(type) ? "#e0f2fe" : "transparent",
+                transition: "0.3s ease",
+                cursor: "pointer"
+              }}
+            >
+              <input
+                className="form-check-input ms-1 me-2"
+                type="checkbox"
+                id={type}
+                value={type}
+                checked={filters.busTypes.includes(type)}
+                onChange={handleBusTypeChange}
+                style={{ cursor: "pointer" }}
+              />
+              <label 
+                className="form-check-label small text-dark w-100" 
+                htmlFor={type}
+                style={{ cursor: "pointer", fontWeight: filters.busTypes.includes(type) ? "600" : "400" }}
+              >
+                {type}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <button type="submit" className="btn btn-primary btn-sm w-100">
+      <button 
+        type="submit" 
+        className="btn w-100 py-2 fw-bold text-white shadow-sm"
+        style={{ 
+          backgroundColor: "#0077b6", 
+          borderRadius: "10px", 
+          border: "none",
+          marginTop: "10px"
+        }}
+      >
         Apply Filters
       </button>
     </form>

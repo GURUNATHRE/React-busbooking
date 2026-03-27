@@ -95,8 +95,8 @@ function Navbar({ onLoginClick }) {
                             {pages.map((page) => {
                                 const disabled = isPageDisabled(page.path);
                                 return (
-                                    <MenuItem 
-                                        key={page.name} 
+                                    <MenuItem
+                                        key={page.name}
                                         disabled={disabled}
                                         onClick={() => {
                                             navigate(page.path);
