@@ -83,7 +83,8 @@ function Businput({ onLoginClick }) {
             if (filteredBuses.length > 0) {
                 navigate("/buses", { state: { filteredBuses } });
             } else {
-                alert("No buses found for selected route");
+                setOpenAlert(true);
+                setAlertMessage("No Buses Available")
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -119,14 +120,14 @@ function Businput({ onLoginClick }) {
 
             <Navbar onLoginClick={onLoginClick} />
 
-            <div id="total" className="d-flex flex-column">
-                <div className="total">
-                    <Box sx={{ py: 8.5, textAlign: 'center' }}>
+            <div  className="d-flex flex-column">
+                <div >
+                    <Box sx={{ py: 8.5, textAlign: 'center' }} className="total">
                         <Container>
                             <Typography variant="h2" sx={{ fontWeight: 800, color: '#1E293B', mb: 2 }}>
-                                India's <Box component="span" sx={{ color: '#a36532' }}>No. 1</Box> Bus Ticket Site
+                                India's <Box component="span" sx={{ color: '#FF9933' }}>No. 1</Box> Bus Ticket Application
                             </Typography>
-                            <Typography variant="h6" sx={{ color: '#64748B' }}>
+                            <Typography variant="h6" sx={{ color: '#5f5d5d' ,fontWeight:600}}>
                                 Safe, Secure and Comfortable Journeys
                             </Typography>
                         </Container>
@@ -161,16 +162,16 @@ function Businput({ onLoginClick }) {
                                             <TextField
                                                 {...params}
                                                 placeholder="Starting City"
-                                                size="small"   // 👈 important
+                                                size="small"   
                                                 sx={{
                                                     "& .MuiOutlinedInput-root": {
                                                         height: "60px",
-                                                        width: "12vw",      // 🔥 increase height
-                                                        fontSize: "1rem",     // text size
+                                                        width: "12vw",     
+                                                        fontSize: "1rem",     
                                                         borderRadius: "10px"
                                                     },
                                                     "& input": {
-                                                        padding: "14px"       // inner spacing
+                                                        padding: "14px"       
                                                     }
                                                 }}
                                                 InputProps={{
@@ -226,7 +227,7 @@ function Businput({ onLoginClick }) {
                                         sx={{
                                             "& .MuiOutlinedInput-root": {
                                                 height: "60px",
-                                                width: "12vw", // Matches your From/To width
+                                                width: "12vw", 
                                                 fontSize: "1rem",
                                                 borderRadius: "10px"
                                             },
@@ -241,7 +242,7 @@ function Businput({ onLoginClick }) {
                                         onClick={handleSearch}
                                         variant="contained"
                                         fullWidth
-                                        sx={{ height: '50px', bgcolor: "#a36532", mt: 3, fontWeight: 'bold', '&:hover': { bgcolor: "#8b5529" } }}
+                                        sx={{ height: '50px', bgcolor: "#FF9933", mt: 3, fontWeight: 'bold', '&:hover': { bgcolor: "#eb9540" } }}
                                     >
                                         <i className="fa-solid fa-magnifying-glass" style={{ marginRight: '8px' }}></i> SEARCH
                                     </Button>
@@ -252,22 +253,22 @@ function Businput({ onLoginClick }) {
 
                     {/* Offers... */}
                     <Container sx={{ mb: 5 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
-                            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B' }}>Exclusive Offers</Typography>
-                            <Chip label="Current Promotions" color="primary" variant="outlined" sx={{ fontWeight: 'bold' }} />
+                        <Stack direction="row"  alignItems="center" sx={{ mb: 4 }}>
+                            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B' ,mr:80}}>Exclusive Offers</Typography>
+                            <Chip label="AVAILABLE"  variant="outlined" sx={{ fontWeight: 'bold' ,color:'#FF9933',borderColor:'#887761','&:hover': { bgcolor: "#dbdbdb",cursor:"pointer" }}} />
                         </Stack>
                         <Grid container spacing={3}>
                             {[
-                                { title: "SAVE UP TO ₹250", code: "FIRSTBUS", color: "#3B82F6", label: "First Time Users" },
-                                { title: "CASHBACK ₹150", code: "VISACARD", color: "#10B981", label: "Wallet Offer" },
-                                { title: "GROUP BOOKING", code: "FLAT10", color: "#F59E0B", label: "4+ Seats" },
-                                { title: "INDIVIDUAL PROMO", code: "FLAT30", color: "#64748B", label: "New Routes" }
+                                { title: "SAVE UP TO ₹250", code: "FIRSTBUS", color: "#829cc5e1", label: "First Time Users" },
+                                { title: "CASHBACK ₹150", code: "VISACARD", color: "#71b8a0e0", label: "Wallet Offer" },
+                                { title: "GROUP BOOKING", code: "FLAT10", color: "#e4ac4c", label: "4+ Seats" },
+                                { title: "INDIVIDUAL PROMO", code: "FLAT30", color: "#77879cb6", label: "New Routes" }
                             ].map((offer, index) => (
                                 <Grid item xs={12} sm={6} md={3} key={index}>
                                     <Card sx={{ p: 3, bgcolor: offer.color, color: 'white', borderRadius: 4, height: '100%', transition: '0.3s', '&:hover': { transform: 'translateY(-10px)' } }}>
                                         <Typography variant="h6" sx={{ fontWeight: 900 }}>{offer.title}</Typography>
                                         <Typography variant="body2" sx={{ opacity: 0.9, my: 1 }}>Use code: <strong>{offer.code}</strong></Typography>
-                                        <Chip size="small" label={offer.label} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 'bold' }} />
+                                        <Chip size="small" label={offer.label} sx={{ bgcolor: 'rgba(255, 255, 255, 0.5)', color: '#5c5c5ce1', fontWeight: 'bold' }} />
                                     </Card>
                                 </Grid>
                             ))}
@@ -280,8 +281,8 @@ function Businput({ onLoginClick }) {
                     <Container>
                         <Grid container spacing={10}>
                             <Grid item xs={12} md={3}>
-                                <Typography variant="h5" color="white" sx={{ fontWeight: 800, mb: 3, display: 'flex', alignItems: 'center' }}>
-                                    <DirectionsBusIcon sx={{ mr: 1, color: '#a36532' }} /> BusTicket
+                                <Typography variant="h5" color="white" sx={{ fontWeight: 800, mb: 3, display: 'flex', alignItems: 'center',color:'#FF9933' }}>
+                                    <DirectionsBusIcon sx={{ mr: 1, color: '#FF9933' }} /> BusTicket
                                 </Typography>
                                 <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
                                     The world's leading bus ticket booking platform. <br />We provide the best prices and travel options.
@@ -300,7 +301,7 @@ function Businput({ onLoginClick }) {
                                 <Typography variant="body2" sx={{ mb: 1 }}>Email: support@busticket.com</Typography>
                                 <Stack direction="row" spacing={1} mt={2}>
                                     {[FacebookIcon, TwitterIcon, InstagramIcon].map((Icon, i) => (
-                                        <IconButton key={i} sx={{ color: '#94A3B8', border: '1px solid #334155' }}><Icon fontSize="small" /></IconButton>
+                                        <IconButton key={i} sx={{ color: '#d2d5da', border: '1px solid #f5f5f5' }}><Icon fontSize="small" /></IconButton>
                                     ))}
                                 </Stack>
                             </Grid>
@@ -312,7 +313,7 @@ function Businput({ onLoginClick }) {
                             </Grid>
                         </Grid>
                         <Divider sx={{ my: 2, borderColor: '#1E293B' }} />
-                        <Typography variant="body2" align="center">© 2026 BusTicket India.</Typography>
+                        <Typography variant="body2" align="center" sx={{color:'white'}}> © 2026 BusTicket India.</Typography>
                     </Container>
                 </Box>
             </div>

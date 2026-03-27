@@ -10,7 +10,6 @@ import LockIcon from '@mui/icons-material/Lock'; // Added for visual cue
 
 const pages = [
     { name: 'Home', path: '/' },
-    { name: 'Buses', path: '/buses' },
     { name: 'My Bookings', path: '/mybookings' },
 ];
 
@@ -43,7 +42,7 @@ function Navbar({ onLoginClick }) {
 
         return {
             my: 2,
-            color: 'white',
+            color: 'black',
             textTransform: 'none',
             fontSize: '0.95rem',
             fontWeight: isActive ? 700 : 400,
@@ -61,11 +60,11 @@ function Navbar({ onLoginClick }) {
     };
 
     return (
-        <AppBar position="sticky" sx={{ backgroundColor: '#7c99b6e0', boxShadow: 'none' }}>
+        <AppBar position="sticky" sx={{ backgroundColor: '#ffffffe0', boxShadow: 'none' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     {/* Desktop Logo */}
-                    <DirectionsBusIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                    <DirectionsBusIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 ,color:'#FF9933'}} />
                     <Typography
                         variant="h6"
                         component={RouterLink}
@@ -74,7 +73,7 @@ function Navbar({ onLoginClick }) {
                             mr: 4,
                             display: { xs: 'none', md: 'flex' },
                             fontWeight: 800,
-                            color: 'white',
+                            color: '#FF9933',
                             textDecoration: 'none',
                         }}
                     >
@@ -176,14 +175,16 @@ function Navbar({ onLoginClick }) {
                             </>
                         ) : (
                             <Button
-                                variant="contained"
+                                variant="outlined"
                                 onClick={onLoginClick}
                                 sx={{
-                                    backgroundColor: '#4e4c49',
+                                    backgroundColor: '#f1f1f1',
+                                    color:'black',
                                     borderRadius: '20px',
+                                    borderColor:'#887761',
                                     px: 3,
                                     textTransform: 'none',
-                                    '&:hover': { backgroundColor: '#333' }
+                                    '&:hover': { backgroundColor: '#dbdbdb' }
                                 }}
                             >
                                 Login

@@ -27,17 +27,28 @@ function Carddetails() {
     // Load Accept.js
     useEffect(() => {
         const script = document.createElement("script");
-        script.src = "https://js.authorize.net/v1/Accept.js";
+        script.src = "https://jstest.authorize.net/v1/Accept.js";
         script.async = true;
         document.body.appendChild(script);
     }, []);
 
     // WebSocket for sending booking confirmation
     useEffect(() => {
+        if (!busId || busId === "undefined") return;
+
+        console.log(`Connecting to WebSocket: ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
         const socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
         socketRef.current = socket;
-        socket.onopen = () => console.log("WebSocket Connected");
-        return () => socket.close();
+
+        socket.onopen = () => console.log("WebSocket Connected ✅");
+        socket.onerror = (e) => console.error("WebSocket Error ❌:", e);
+        socket.onclose = () => console.log("WebSocket Closed 🔒");
+
+        return () => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+        };
     }, [busId]);
 
     // 3-minute countdown timeran
@@ -69,7 +80,7 @@ function Carddetails() {
     // Called only after payment success
     const createBookingAndNotify = async () => {
         try {
-            const res = await fetch("http://127.0.0.1:8000/Bookingview/", {
+            const res = await fetch("http://127.0.0.1:8000/list/Bookingview/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -118,7 +129,7 @@ function Carddetails() {
 
         const authData = {
             apiLoginID: "73PHr3Jzuea",
-            clientKey: "6j48z4G5668bPYFD6dFKTpcPBg3C55eujrK5qSX7Z66GzLCV78fzmt77URJWg27F"
+            clientKey: "4h7E8M644vYTY69jUfT2LaZA5c2fZycqSugLsxYh53Tnu7rEnG27Ku354776TGEd"
         };
 
         const cardData = {
@@ -134,25 +145,28 @@ function Carddetails() {
 
                 try {
                     // Step 1: Process payment
-                    const payRes = await fetch("/api/pay/", {
+                    const payRes = await fetch("http://127.0.0.1:8000/list/api/pay/", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ opaqueData, amount: finalPrice })
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Token ${token}`
+                        },
+                        body: JSON.stringify({ opaquedata: opaqueData, amount: finalPrice })
                     });
                     const payData = await payRes.json();
 
                     if (!payRes.ok) throw new Error(payData.message || "Payment failed");
 
                     // Step 2: Payment success → now create booking
-                    const bookings = await createBookingAndNotify();
+                    await createBookingAndNotify();
 
-                    setMessage("Payment successful! Booking confirmed.");
+                    setMessage("🎉 Congratulations! Your booking is confirmed. Redirecting to your bookings...");
                     setLoading(false);
 
-                    // Navigate to confirmation
-                    navigate(`/bus/${busId}/confirmation`, {
-                        state: { bookings, travelers, finalPrice, selectedSeatNos }
-                    });
+                    // Wait 3 seconds then go to My Bookings
+                    setTimeout(() => {
+                        navigate("/mybookings");
+                    }, 3000);
 
                 } catch (err) {
                     console.error(err);

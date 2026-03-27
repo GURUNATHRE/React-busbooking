@@ -50,48 +50,58 @@ function FiltersContent({ onApplyFilters }) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h5 className="fw-bold m-0 text-dark">Filters</h5>
+        <h5 className="fw-bold m-0 " style={{ color: '#FF9933' }}>Filters</h5>
         <button
           type="button"
           onClick={handleClear}
-          className="btn btn-link btn-sm text-danger p-0 text-decoration-none fw-bold"
-          style={{ fontSize: "0.8rem" }}
+          className="btn btn-link btn-sm p-0 text-decoration-none fw-bold"
+          style={{ fontSize: "0.8rem", color: '#fa3402' }}
         >
           CLEAR ALL
         </button>
       </div>
 
-      <hr style={{ opacity: "0.1" }} />
+      <hr style={{ opacity: "0.9" }} />
 
       {/* Price Range */}
       <div className="mb-4">
-        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "0.75rem" }}>
-          Price Range (₹)
+        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "1rem" }}>
+          Price Range :
         </p>
 
         <div className="row g-2">
           <div className="col-6">
-            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem" }}>Starting</label>
+            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Starting</label>
             <input
               type="number"
               name="minPrice"
               value={filters.minPrice}
               onChange={handlePriceChange}
-              className="form-control form-control-sm border-0 bg-light"
+              className="form-control form-control-sm bg-light"
               placeholder="₹100"
-              style={{ borderRadius: "8px", padding: "10px" }}
+              style={{
+                borderRadius: "8px",
+                padding: "10px",
+                border: "1px solid #000000"
+              }}
             />
           </div>
           <div className="col-6">
-            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem" }}>Maximum</label>
+            <label className="form-label small text-muted mb-1" style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Maximum</label>
             <input
               type="number"
               name="maxPrice"
               value={filters.maxPrice}
               onChange={handlePriceChange}
-              className="form-control form-control-sm border-0 bg-light"
+              className="form-control form-control-sm bg-light"
               placeholder="₹1000"
-              style={{ borderRadius: "8px", padding: "10px" }}
+              style={{
+                borderRadius: "8px",
+                padding: "10px",
+                border: "1px solid #000000",
+                fontWeight: "600", 
+                fontSize: "0.85rem"
+              }}
             />
           </div>
         </div>
@@ -101,18 +111,18 @@ function FiltersContent({ onApplyFilters }) {
 
       {/* Bus Type */}
       <div className="mb-4">
-        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "0.75rem" }}>
-          Bus Type
+        <p className="small fw-bold text-uppercase text-muted mb-3" style={{ fontSize: "1rem", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+          Bus Type :
         </p>
 
         <div className="d-flex flex-column gap-1">
           {["Ac sleeper", "Non AC", "Sleeper", "Seater"].map((type) => (
-            <div 
-              className="form-check p-2" 
+            <div
+              className="form-check p-2"
               key={type}
-              style={{ 
-                borderRadius: "8px", 
-                backgroundColor: filters.busTypes.includes(type) ? "#e0f2fe" : "transparent",
+              style={{
+                borderRadius: "8px",
+                backgroundColor: filters.busTypes.includes(type) ? "#a5a8a8" : "#e7ecec",
                 transition: "0.3s ease",
                 cursor: "pointer"
               }}
@@ -126,8 +136,8 @@ function FiltersContent({ onApplyFilters }) {
                 onChange={handleBusTypeChange}
                 style={{ cursor: "pointer" }}
               />
-              <label 
-                className="form-check-label small text-dark w-100" 
+              <label
+                className="form-check-label small text-dark w-100"
                 htmlFor={type}
                 style={{ cursor: "pointer", fontWeight: filters.busTypes.includes(type) ? "600" : "400" }}
               >
@@ -138,12 +148,12 @@ function FiltersContent({ onApplyFilters }) {
         </div>
       </div>
 
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         className="btn w-100 py-2 fw-bold text-white shadow-sm"
-        style={{ 
-          backgroundColor: "#0077b6", 
-          borderRadius: "10px", 
+        style={{
+          backgroundColor: "#FF9933",
+          borderRadius: "10px",
           border: "none",
           marginTop: "10px"
         }}
