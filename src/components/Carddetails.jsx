@@ -1,14 +1,301 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useParams } from "react-router-dom";
 
-const TIMER_SECONDS = 3 * 60; // 3 minutes
+const TIMER_SECONDS = 3 * 60;
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  .carddetails-root {
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding: 40px 0 60px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .carddetails-back-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 16px;
+  }
+
+  .carddetails-back-btn {
+    background: #eba554;
+    color: #ffffff;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: background 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .carddetails-back-btn:hover {
+    background: #e19442;
+  }
+
+  .carddetails-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .carddetails-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px 30px 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    max-width: 480px;
+    margin: 0 auto;
+    border: 1px solid #e8edf3;
+  }
+
+  .carddetails-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .carddetails-header-icon {
+    font-size: 22px;
+  }
+
+  .carddetails-header-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: -0.3px;
+  }
+
+  /* Timer */
+  .carddetails-timer {
+    border-radius: 12px;
+    text-align: center;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    transition: all 0.4s;
+  }
+  .carddetails-timer.green {
+    background: #f2eee9;
+    border: 2px solid #d68c46;
+  }
+  .carddetails-timer.orange {
+    background: #fff7ed;
+    border: 2px solid #f97316;
+  }
+  .carddetails-timer.red {
+    background: #fef2f2;
+    border: 2px solid #ef4444;
+  }
+  .carddetails-timer-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .carddetails-timer.green .carddetails-timer-value { color: #121212; }
+  .carddetails-timer.orange .carddetails-timer-value { color: #ea580c; }
+  .carddetails-timer.red .carddetails-timer-value { color: #dc2626; }
+
+  .carddetails-timer-sub {
+    font-size: 12.5px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  /* Summary */
+  .carddetails-summary {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    border: 1px solid #e8edf3;
+  }
+  .carddetails-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .carddetails-summary-row + .carddetails-summary-row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e8edf3;
+  }
+  .carddetails-summary-label {
+    font-size: 13.5px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .carddetails-summary-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+  }
+  .carddetails-summary-value.amount {
+    font-size: 18px;
+    color: #d49f2d;
+  }
+
+  /* Form */
+  .carddetails-field {
+    margin-bottom: 16px;
+  }
+  .carddetails-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .carddetails-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #ebc57e;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: #423526;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  .carddetails-input::placeholder {
+    color: #b0bac4;
+  }
+  .carddetails-input:focus {
+    border-color: #e2872d;
+  }
+  .carddetails-input:disabled {
+    background: #f8fafc;
+    color: #a0aec0;
+    cursor: not-allowed;
+  }
+
+  .carddetails-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  /* Pay button */
+  .carddetails-pay-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    background: #e1b077;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-top: 6px;
+    box-shadow: 0 4px 14px rgba(34,197,94,0.25);
+  }
+  .carddetails-pay-btn:hover:not(:disabled) {
+    opacity: 0.93;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(34,197,94,0.30);
+  }
+  .carddetails-pay-btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .carddetails-pay-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .carddetails-expired-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #374151;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .carddetails-expired-btn:hover {
+    background: #f8fafc;
+  }
+
+  .carddetails-message {
+    margin-top: 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+  }
+  .carddetails-message.success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+  }
+  .carddetails-message.error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+
+  /* Divider above form */
+  .carddetails-divider {
+    height: 1px;
+    background: #e8edf3;
+    margin: 0 0 20px;
+  }
+
+  /* Secure badges */
+  .carddetails-badges {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .carddetails-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+`
 function Carddetails() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { id } = useParams();
 
-    // All data passed from Paymentprocess
     const { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId } = location.state || {};
 
     const [cardNumber, setCardNumber] = useState("");
@@ -24,7 +311,12 @@ function Carddetails() {
     const socketRef = useRef(null);
     const token = localStorage.getItem("access");
 
-    // Load Accept.js
+    useEffect(() => {
+        if (expired) {
+            handleRestart();
+        }
+    }, [expired]);
+
     useEffect(() => {
         const script = document.createElement("script");
         script.src = "https://jstest.authorize.net/v1/Accept.js";
@@ -32,40 +324,24 @@ function Carddetails() {
         document.body.appendChild(script);
     }, []);
 
-    // WebSocket for sending booking confirmation
     useEffect(() => {
         if (!busId || busId === "undefined") return;
-
-        console.log(`Connecting to WebSocket: ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
         const socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
         socketRef.current = socket;
-
-        socket.onopen = () => console.log("WebSocket Connected ✅");
-        socket.onerror = (e) => console.error("WebSocket Error ❌:", e);
-        socket.onclose = () => console.log("WebSocket Closed 🔒");
-
-        return () => {
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.close();
-            }
-        };
+        socket.onopen = () => console.log("WebSocket Connected ");
+        socket.onerror = (e) => console.error("WebSocket Error :", e);
+        socket.onclose = () => console.log("WebSocket Closed ");
+        return () => { if (socket.readyState === WebSocket.OPEN) socket.close(); };
     }, [busId]);
 
-    // 3-minute countdown timeran
     useEffect(() => {
         if (expired) return;
-
         const interval = setInterval(() => {
             setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    setExpired(true);
-                    return 0;
-                }
+                if (prev <= 1) { clearInterval(interval); setExpired(true); return 0; }
                 return prev - 1;
             });
         }, 1000);
-
         return () => clearInterval(interval);
     }, [expired]);
 
@@ -75,241 +351,216 @@ function Carddetails() {
         return `${m}:${s}`;
     };
 
-    const timerColor = timeLeft <= 30 ? "#dc3545" : timeLeft <= 60 ? "#fd7e14" : "#198754";
+    const timerClass = expired ? "red" : timeLeft <= 30 ? "red" : timeLeft <= 60 ? "orange" : "green";
 
-    // Called only after payment success
     const createBookingAndNotify = async () => {
-        try {
-            const res = await fetch("http://127.0.0.1:8000/list/Bookingview/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Token ${token}`
-                },
-                body: JSON.stringify({ seat: selectedSeatIds })
-            });
-
-            if (!res.ok) throw new Error("Booking API failed");
-
-            const data = await res.json();
-            const bookings = data.bookings;
-
-            // Now send socket messages to update other users
-            bookings.forEach((handledata) => {
-                if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-                    socketRef.current.send(JSON.stringify({
-                        username: handledata.user,
-                        seat_id: handledata.seat.seat_no,
-                        action: handledata.seat.seat_book ? "active" : "inactive"
-                    }));
-                }
-            });
-
-            return bookings;
-        } catch (error) {
-            console.error("Booking error:", error);
-            throw error;
-        }
+        const res = await fetch("http://127.0.0.1:8000/list/Bookingview/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Token ${token}` },
+            body: JSON.stringify({ seat: selectedSeatIds })
+        });
+        if (!res.ok) throw new Error("Booking API failed");
+        const data = await res.json();
+        const bookings = data.bookings;
+        bookings.forEach((handledata) => {
+            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+                socketRef.current.send(JSON.stringify({
+                    username: handledata.user,
+                    seat_id: handledata.seat.seat_no,
+                    action: handledata.seat.seat_book ? "active" : "inactive"
+                }));
+            }
+        });
+        return bookings;
     };
 
     const handlePayment = () => {
-        if (expired) {
-            setMessage("Session expired. Please go back and select seats again.");
-            return;
-        }
-
+        if (expired) { setMessage("Session expired. Please go back and select seats again."); return; }
         setLoading(true);
         setMessage("");
+        if (!window.Accept) { setMessage("Payment library not loaded yet. Please try again."); setLoading(false); return; }
 
-        if (!window.Accept) {
-            setMessage("Payment library not loaded yet. Please try again.");
-            setLoading(false);
-            return;
-        }
-
-        const authData = {
-            apiLoginID: "73PHr3Jzuea",
-            clientKey: "4h7E8M644vYTY69jUfT2LaZA5c2fZycqSugLsxYh53Tnu7rEnG27Ku354776TGEd"
-        };
-
-        const cardData = {
-            cardNumber,
-            month: expMonth,
-            year: expYear,
-            cardCode: cvv
-        };
+        const authData = { apiLoginID: "73PHr3Jzuea", clientKey: "6zByHm5W7MWFvUDs75pqp6jCL8R4SAK9B8VY87rxP38BxhrTUSab56KmfmADjxAE" };
+        const cardData = { cardNumber, month: expMonth, year: expYear, cardCode: cvv };
 
         window.Accept.dispatchData({ authData, cardData }, async function (response) {
             if (response.messages.resultCode === "Ok") {
                 const opaqueData = response.opaqueData;
-
                 try {
-                    // Step 1: Process payment
                     const payRes = await fetch("http://127.0.0.1:8000/list/api/pay/", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Token ${token}`
-                        },
+                        headers: { "Content-Type": "application/json", "Authorization": `Token ${token}` },
                         body: JSON.stringify({ opaquedata: opaqueData, amount: finalPrice })
                     });
                     const payData = await payRes.json();
-
                     if (!payRes.ok) throw new Error(payData.message || "Payment failed");
-
-                    // Step 2: Payment success → now create booking
                     await createBookingAndNotify();
-
-                    setMessage("🎉 Congratulations! Your booking is confirmed. Redirecting to your bookings...");
+                    setMessage("Booking confirmed! Redirecting to your bookings...");
                     setLoading(false);
-
-                    // Wait 3 seconds then go to My Bookings
-                    setTimeout(() => {
-                        navigate("/mybookings");
-                    }, 3000);
-
+                    setTimeout(() => navigate("/mybookings"), 3000);
                 } catch (err) {
-                    console.error(err);
                     setMessage("Error: " + err.message);
                     setLoading(false);
                 }
             } else {
-                const errorMsg = response.messages.message[0].text;
-                setMessage("Payment failed: " + errorMsg);
+                setMessage("Payment failed: " + response.messages.message[0].text);
                 setLoading(false);
             }
         });
     };
 
+    const handleRestart = () => {
+        if (busId || id) {
+            // Navigate to the dynamic bus ID route
+            navigate(`/bus/${busId}/seats`);
+             navigate(`/bus/${id}/seats`);
+        } else {
+            
+            navigate("/");
+        }
+    };
+
     return (
         <>
+            <style>{styles}</style>
             <Navbar />
-            <div className="container mt-5">
-                <div className="row justify-content-center">
-                    <div className="col-md-5">
-                        <div className="card shadow-lg border-0 rounded-4">
-                            <div className="card-body p-4">
+            <div className="carddetails-root">
 
-                                <h3 className="text-center mb-2">💳 Secure Payment</h3>
+                {/* Back row */}
+                <div className="carddetails-back-row">
+                    <button className="carddetails-back-btn" onClick={() => navigate(-1)}>
+                        <ArrowBackIcon style={{ fontSize: 20 }} />
+                    </button>
+                    <h4 className="carddetails-title">Complete Payment</h4>
+                </div>
 
-                                {/* Timer */}
-                                <div
-                                    className="text-center mb-3 py-2 rounded-3"
-                                    style={{ backgroundColor: expired ? "#f8d7da" : "#f0fff4", border: `2px solid ${timerColor}` }}
-                                >
-                                    {expired ? (
-                                        <div>
-                                            <span style={{ color: "#dc3545", fontWeight: "bold", fontSize: "1rem" }}>
-                                                ⏰ Session Expired
-                                            </span>
-                                            <p className="text-danger small mb-0">Your seat hold has expired. Please go back and reselect.</p>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <span style={{ color: timerColor, fontWeight: "bold", fontSize: "1.4rem" }}>
-                                                ⏱ {formatTime(timeLeft)}
-                                            </span>
-                                            <p className="mb-0 small text-muted">Complete payment before time runs out</p>
-                                        </div>
-                                    )}
-                                </div>
+                {/* Card */}
+                <div className="carddetails-card">
 
-                                {/* Fare summary */}
-                                <div className="bg-light rounded-3 p-3 mb-3">
-                                    <div className="d-flex justify-content-between">
-                                        <span className="text-muted small">Seats</span>
-                                        <span className="fw-bold small">{selectedSeatNos?.join(", ")}</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between mt-1">
-                                        <span className="text-muted small">Amount to Pay</span>
-                                        <span className="fw-bold text-success">₹{finalPrice}</span>
-                                    </div>
-                                </div>
+                    {/* Header */}
+                    <div className="carddetails-header">
+                        <span className="carddetails-header-icon"><i className="fa-solid fa-credit-card"></i></span>
+                        <span className="carddetails-header-text">Secure Payment</span>
+                    </div>
 
-                                {/* Card Number */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-bold">Card Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={cardNumber}
-                                        onChange={e => setCardNumber(e.target.value)}
-                                        placeholder="1234 5678 9012 3456"
-                                        disabled={expired}
-                                        maxLength={16}
-                                    />
-                                </div>
-
-                                {/* Expiry */}
-                                <div className="row">
-                                    <div className="col">
-                                        <label className="form-label fw-bold">Month</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={expMonth}
-                                            onChange={e => setExpMonth(e.target.value)}
-                                            placeholder="MM"
-                                            disabled={expired}
-                                            maxLength={2}
-                                        />
-                                    </div>
-                                    <div className="col">
-                                        <label className="form-label fw-bold">Year</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={expYear}
-                                            onChange={e => setExpYear(e.target.value)}
-                                            placeholder="YYYY"
-                                            disabled={expired}
-                                            maxLength={4}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* CVV */}
-                                <div className="mt-3">
-                                    <label className="form-label fw-bold">CVV</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        value={cvv}
-                                        onChange={e => setCvv(e.target.value)}
-                                        placeholder="123"
-                                        disabled={expired}
-                                        maxLength={4}
-                                    />
-                                </div>
-
-                                {/* Pay Button */}
-                                <button
-                                    onClick={handlePayment}
-                                    disabled={loading || expired}
-                                    className="btn btn-success w-100 mt-4 fw-bold py-2"
-                                >
-                                    {loading ? "Processing..." : `Pay ₹${finalPrice}`}
-                                </button>
-
-                                {/* Go back if expired */}
-                                {expired && (
-                                    <button
-                                        className="btn btn-outline-secondary w-100 mt-2"
-                                        onClick={() => navigate(-2)}
-                                    >
-                                        Go Back & Reselect Seats
-                                    </button>
-                                )}
-
-                                {message && (
-                                    <div className={`alert mt-3 text-center ${message.includes("successful") ? "alert-success" : "alert-danger"}`}>
-                                        {message}
-                                    </div>
-                                )}
-
+                    {/* Timer */}
+                    <div className={`carddetails-timer ${timerClass}`}>
+                        {expired ? (
+                            <div className="carddetails-timer-value" style={{ color: "#e74c3c", fontWeight: "bold" }}>
+                                Session Expired. Redirecting...
                             </div>
+
+                        ) : (
+                            <>
+                                <div className="carddetails-timer-value">
+                                    <span>⏱</span>
+                                    <span>{formatTime(timeLeft)}</span>
+                                </div>
+                                <div className="carddetails-timer-sub">Complete payment before time runs out</div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Fare Summary */}
+                    <div className="carddetails-summary">
+                        <div className="carddetails-summary-row">
+                            <span className="carddetails-summary-label">Seat selscted :</span>
+                            <span className="carddetails-summary-value">{selectedSeatNos?.join(", ") || "—"}</span>
+                        </div>
+                        <div className="carddetails-summary-row">
+                            <span className="carddetails-summary-label">Amount to Pay</span>
+                            <span className="carddetails-summary-value amount">₹{finalPrice}</span>
                         </div>
                     </div>
+
+                    <div className="carddetails-divider" />
+
+                    {/* Card Number */}
+                    <div className="carddetails-field">
+                        <label className="carddetails-label">Card Number</label>
+                        <input
+                            className="carddetails-input"
+                            value={cardNumber}
+                            onChange={(e) => {
+                                setCardNumber(e.target.value);
+                            }}
+                            placeholder="1234 5678 9012 3456"
+                            disabled={expired}
+                        />
+                    </div>
+
+                    {/* Month + Year */}
+                    <div className="carddetails-row">
+                        <div className="carddetails-field">
+                            <label className="carddetails-label">Month</label>
+                            <input
+                                className="carddetails-input"
+                                value={expMonth}
+                                onChange={(e) => setExpMonth(e.target.value)}
+                                placeholder="MM"
+                                maxLength={2}
+                                disabled={expired}
+                            />
+                        </div>
+                        <div className="carddetails-field">
+                            <label className="carddetails-label">Year</label>
+                            <input
+                                className="carddetails-input"
+                                value={expYear}
+                                onChange={(e) => setExpYear(e.target.value)}
+                                placeholder="YYYY"
+                                maxLength={4}
+                                disabled={expired}
+                            />
+                        </div>
+                    </div>
+
+                    {/* CVV */}
+                    <div className="carddetails-field">
+                        <label className="carddetails-label">CVV</label>
+                        <input
+                            type="password"
+                            className="carddetails-input"
+                            value={cvv}
+                            onChange={(e) => setCvv(e.target.value)}
+                            placeholder="123"
+                            maxLength={4}
+                            disabled={expired}
+                        />
+                    </div>
+
+                    {/* Pay Button */}
+                    <button
+                        className="carddetails-pay-btn"
+                        onClick={handlePayment}
+                        disabled={loading || expired}
+                    >
+                        {loading ? "Processing..." : `Pay ₹${finalPrice}`}
+                    </button>
+
+                    {/* Expired fallback */}
+                    {expired && (
+                        <button className="carddetails-expired-btn" onClick={() => navigate(-2)}>
+                            ← Go Back & Reselect Seats
+                        </button>
+                    )}
+
+                    {/* Message */}
+                    {message && (
+                        <div className={`carddetails-message ${message.includes("confirmed") ? "success" : "error"}`}>
+                            {message}
+                        </div>
+                    )}
+
+                    {/* Trust badges */}
+                    {!expired && (
+                        <div className="carddetails-badges">
+                            <span className="carddetails-badge">🔒 SSL Secured</span>
+                            <span className="carddetails-badge">🛡️ PCI Compliant</span>
+                            <span className="carddetails-badge">✅ 256-bit Encrypted</span>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </>

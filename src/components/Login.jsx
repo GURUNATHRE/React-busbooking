@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import bus from "../assets/bus.jpg";
 import "../css/Login.css";
+import { useNavigate } from "react-router-dom";
 
 // Styles (unchanged)
 const internalStyles = {
@@ -40,6 +41,7 @@ function Login({ onClose, openRegister }) {
   const [showPass, setShowPass] = useState(false);
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false); // ✅ FIXED
+  const navigate = useNavigate();
 
   const {
     register,
@@ -129,7 +131,7 @@ function Login({ onClose, openRegister }) {
               )}
 
               {/* PASSWORD */}
-              <TextField 
+              <TextField
                 fullWidth
                 size="small"
                 type={showPass ? "text" : "password"}
@@ -211,6 +213,25 @@ function Login({ onClose, openRegister }) {
                 ) : (
                   "Create Account"
                 )}
+              </span>
+            </Typography>
+
+            <Typography align="center" sx={{ mt: 3 }}>
+              Firgot Password?{" "}
+              <span
+                onClick={() => {
+                  onClose();
+                  navigate("/editpass");
+                }}
+                style={{
+                  color: "#a8a19af6",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center"
+                }}
+              >
+                "ResetPassword"
               </span>
             </Typography>
           </Box>

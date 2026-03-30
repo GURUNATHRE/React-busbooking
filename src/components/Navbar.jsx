@@ -165,9 +165,6 @@ function Navbar({ onLoginClick }) {
                                     open={Boolean(anchorElUser)}
                                     onClose={handleCloseUserMenu}
                                 >
-                                    <MenuItem onClick={() => { navigate('/profile'); handleCloseUserMenu(); }}>
-                                        <Typography textAlign="center">Profile</Typography>
-                                    </MenuItem>
                                     <MenuItem onClick={handleLogout}>
                                         <Typography textAlign="center" color="error">Logout</Typography>
                                     </MenuItem>
