@@ -380,7 +380,7 @@ function Carddetails() {
         setMessage("");
         if (!window.Accept) { setMessage("Payment library not loaded yet. Please try again."); setLoading(false); return; }
 
-        const authData = { apiLoginID: "73PHr3Jzuea", clientKey: "6zByHm5W7MWFvUDs75pqp6jCL8R4SAK9B8VY87rxP38BxhrTUSab56KmfmADjxAE" };
+        const authData = { apiLoginID: "73PHr3Jzuea", clientKey: "3jrc454tJWSPPm8gzLG352wwKq342SegME342TCt6kQp9A476e37bqGL6sc9n6yH" };
         const cardData = { cardNumber, month: expMonth, year: expYear, cardCode: cvv };
 
         window.Accept.dispatchData({ authData, cardData }, async function (response) {

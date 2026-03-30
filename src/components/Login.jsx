@@ -40,7 +40,8 @@ const internalStyles = {
 function Login({ onClose, openRegister }) {
   const [showPass, setShowPass] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ FIXED
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -53,17 +54,36 @@ function Login({ onClose, openRegister }) {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
     setServerError("");
+
     try {
-      const res = await axios.post(`${BASE_URL}Loginview/`, data);
+      // ✅ Trim & normalize data before sending
+      const payload = {
+        email: data.email.trim().toLowerCase(),
+        password: data.password.trim(),
+      };
+
+      const res = await axios.post(`${BASE_URL}Loginview/`, payload);
+
       if (res.status === 200) {
         localStorage.setItem("access", res.data.token);
+        setIsSubmitting(false);
         onClose();
       }
     } catch (error) {
-      const msg = error.response?.data?.error || "Invalid credentials. Please try again.";
+      const msg =
+        error.response?.data?.error ||
+        "Invalid credentials. Please try again.";
+        setIsSubmitting(false);
+
       setServerError(msg);
-      setError("password", { type: "manual" });
+
+      // ✅ Show error properly in form
+      setError("password", {
+        type: "manual",
+        message: msg,
+      });
     }
   };
 
@@ -162,14 +182,19 @@ function Login({ onClose, openRegister }) {
               )}
 
               {/* BUTTON */}
-              <Button fullWidth type="submit" sx={{
-                py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
-                textTransform: "none", fontSize: "1rem",
-                bgcolor: "#f1b47bf6",
-                color: "white",
-                '&:hover': { bgcolor: '#f8aa61f6' }
-              }}>
-                Sign In
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                sx={{
+                  py: 1.5, mt: 1, borderRadius: "12px", fontWeight: 700,
+                  textTransform: "none", fontSize: "1rem",
+                  bgcolor: "#f1b47bf6",
+                  '&:hover': { bgcolor: '#f8aa61f6' }
+                }}
+              >
+                {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
               </Button>
             </form>
 

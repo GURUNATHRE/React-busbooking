@@ -20,7 +20,7 @@ function Buses() {
 
   // Get filteredBuses from the home page search state
   const { filteredBuses } = location.state || {};
-
+  const [seatStats, setSeatStats] = useState({ total: 0, booked: 0, available: 0 })
   const [allBuses, setAllBuses] = useState([]);
   const [filteredBusesList, setFilteredBusesList] = useState([]);
   const [filters, setFilters] = useState({
@@ -86,8 +86,8 @@ function Buses() {
   const handleseats = (id) => {
     navigate(`/bus/${id}/seats`, {
       state: {
-        filteredBuses: allBuses, 
-        prevSearch: searchText  
+        filteredBuses: allBuses,
+        prevSearch: searchText
       }
     });
   };
@@ -275,8 +275,8 @@ function Buses() {
               <button
                 onClick={() => setShowFilters(false)}
                 className="btn btn-sm rounded-circle text-white d-flex align-items-center justify-content-center"
-                style={{ fontSize: "20px", border: "2px solid white", width: "30px", height: "30px" }}
-              >×</button>
+                style={{ fontSize: "20px", border: "2px solid white", width: "30px", height: "30px" ,padding:20}}
+              ><i className="fa-solid fa-x"></i></button>
             </div>
             <div className="bg-white p-4 shadow-lg" style={{ borderRadius: "25px", maxHeight: "80vh", overflowY: "auto" }}>
               <FiltersContent onApplyFilters={handleFilters} />
