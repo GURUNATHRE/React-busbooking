@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios"; // Added Axios import
 import {
   Box, Paper, Typography, TextField, Button,
-  IconButton, InputAdornment, Fade, Divider, CircularProgress,Stack
+  IconButton, InputAdornment, Fade, Divider, CircularProgress, Stack
 } from "@mui/material";
 import taj from "../assets/taj.jpg";
 import "../css/Registration.css"
@@ -38,35 +38,59 @@ function Registration({ onClose, openLogin }) {
   const [showPass, setShowPass] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   // Added setError to handle API response errors
   const { register, handleSubmit, formState: { errors }, setError } = useForm({ mode: "onBlur" });
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+
     try {
-      // POST request to your registration API
-      const response = await axios.post("register/", {
-        username: data.username,
-        email: data.email,
-        password: data.password
-      }, {
-        headers: { "Content-Type": "application/json" }
-      });
+      const payload = {
+        username: data.username.trim().replace(/\s+/g, "_"),
+        email: data.email.trim().toLowerCase(),
+        password: data.password.trim(),
+      };
+
+      const response = await axios.post(
+        "register/",
+        payload,
+        {
+          headers: { "Content-Type": "application/json" }
+        }
+      );
 
       console.log("Registering Success:", response.data);
-      alert("Account created successfully!");
-      openLogin(); // Switch to login view after success
+      setSuccessMsg("Account created successfully!");
+      openLogin();
 
     } catch (error) {
       console.error("Registration Error:", error.response?.data);
 
-      // Map backend errors to the form fields
       const apiErrors = error.response?.data;
+
       if (apiErrors) {
-        if (apiErrors.username) setError("username", { type: "manual", message: apiErrors.username[0] });
-        if (apiErrors.email) setError("email", { type: "manual", message: apiErrors.email[0] });
-        if (apiErrors.password) setError("password", { type: "manual", message: apiErrors.password[0] });
+        if (apiErrors.username) {
+          setError("username", {
+            type: "manual",
+            message: apiErrors.username[0],
+          });
+        }
+
+        if (apiErrors.email) {
+          setError("email", {
+            type: "manual",
+            message: apiErrors.email[0],
+          });
+        }
+
+        if (apiErrors.password) {
+          setError("password", {
+            type: "manual",
+            message: apiErrors.password[0],
+          });
+        }
       }
     } finally {
       setIsSubmitting(false);
@@ -152,6 +176,12 @@ function Registration({ onClose, openLogin }) {
                 >
                   {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
                 </Button>
+
+                {successMsg && (
+                  <Typography color="green" sx={{ mt: 1 }}>
+                    {successMsg}
+                  </Typography>
+                )}
               </Stack>
             </form>
 
@@ -162,10 +192,10 @@ function Registration({ onClose, openLogin }) {
             </Divider>
 
             <Box display="flex" gap={2}>
-              <Button fullWidth variant="outlined" sx={{color:"black",borderColor:'black',borderRadius:2}} >
+              <Button fullWidth variant="outlined" sx={{ color: "black", borderColor: 'black', borderRadius: 2 }} >
                 <i className="fa-brands fa-google" style={{ marginRight: 8 }} /> Google
               </Button>
-              <Button fullWidth variant="outlined" sx={{color:"black",borderColor:'black',borderRadius:2}}>
+              <Button fullWidth variant="outlined" sx={{ color: "black", borderColor: 'black', borderRadius: 2 }}>
                 <i className="fa-brands fa-apple" style={{ marginRight: 8 }} /> Apple
               </Button>
             </Box>

@@ -24,12 +24,13 @@ function Paymentprocess() {
     const [coupons, setCoupons] = useState([]);
     const [travelers, setTravelers] = useState([]);
     const [businfo, setbusinfo] = useState(null);
+    const [copiedCode, setCopiedCode] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [couponInput, setCouponInput] = useState("");
 
     const [error, setError] = useState("");
 
-    // ... (Keep your existing useEffects and handleInputChange here) ...
+    // ... (Keep your existing useEffects and handleInputChange here) ...coupo
     useEffect(() => {
         const fetchbus = async () => {
             try {
@@ -92,7 +93,11 @@ function Paymentprocess() {
 
     const copyToClipboard = (code) => {
         navigator.clipboard.writeText(code);
-        alert("Coupon copied: " + code);
+        setCopiedCode(code);
+
+        setTimeout(() => {
+            setCopiedCode("");
+        }, 2000);
     };
 
     const appliedCoupon = coupons.find((c) => c.Couponcode === couponInput);
@@ -120,9 +125,9 @@ function Paymentprocess() {
                             px: { xs: 2, md: 0 }
                         }}
                     >
-                        {/* 🔙 Back Button */}
+
                         <button
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate(-1)}
                             className="btn shadow-sm d-flex align-items-center justify-content-center"
                             style={{
                                 backgroundColor: '#e67e22',
@@ -138,7 +143,7 @@ function Paymentprocess() {
                             <i className="fa fa-arrow-left"></i>
                         </button>
 
-                        {/* 📝 Heading */}
+
                         <h2
                             className="fw-bold m-0"
                             style={{
@@ -534,7 +539,11 @@ function Paymentprocess() {
                                     </Box>
                                 </CardContent>
                             </Card>
-
+                            {copiedCode && (
+                                <span style={{ color: "#1d1d1d", marginLeft: "10px" , padding: "2px 8px", borderRadius: "12px", fontSize: "0.75rem", fontWeight: "bold", }}>
+                                    Copied !
+                                </span>
+                            )}
                             <Card sx={{
                                 height: 380,
                                 display: "flex",

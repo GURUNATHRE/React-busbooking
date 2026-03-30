@@ -16,7 +16,7 @@ function Seats() {
 
   const token = localStorage.getItem("access");
 
-  // particular bus logic (Unchanged)
+  // particular bus 
   useEffect(() => {
     const fetchbus = async () => {
       try {
@@ -34,7 +34,7 @@ function Seats() {
     fetchbus();
   }, [id, token]);
 
-  // seats for the bus logic (Unchanged)
+  // seats for the bus 
   useEffect(() => {
     const fetchSeats = async () => {
       try {
@@ -49,7 +49,7 @@ function Seats() {
     fetchSeats();
   }, [id, token]);
 
-  // WebSocket connection logic (Unchanged)
+  // WebSocket connection 
   useEffect(() => {
     let socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${id}/seats/`);
     socketRef.current = socket;
@@ -74,7 +74,7 @@ function Seats() {
     return () => socket.close();
   }, [id]);
 
-  // Fixed Toggle Logic (Unchanged)
+  // Fixed Toggle 
   const toggleSeat = (seat) => {
     if (seat.seat_book || (seat.seat_hold && !selectedSeat.some(s => s.id === seat.id))) return;
 
@@ -139,7 +139,7 @@ function Seats() {
             <div className="col-lg-5 d-flex flex-column align-items-center">
               <div className="bus-chassis shadow-lg">
                 <div className="bus-front">
-                  <i className="fas fa-dharmachakra steering-wheel"></i>
+                  <i className="fas fa-dharmachakra steering-wheel" style={{color:"#f39e4f",paddingBottom:"20px" ,fontSize:"2rem"} }></i>
                 </div>
 
                 <div className="seats-grid-layout">
@@ -280,6 +280,8 @@ function Seats() {
                 <div className="legend-item"><span className="dot selected-dot"></span> Selected</div>
                 <div className="legend-item"><span className="dot held-dot"></span> Hold</div>
                 <div className="legend-item"><span className="dot sld"></span> Sold</div>
+                <div className="legend-item"><span className="dot wmn"></span> Women</div>
+                
               </div>
             </div>
           </div>

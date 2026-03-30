@@ -40,6 +40,7 @@
 .dot.selected-dot { background: #2ecc71; }
 .dot.held-dot { background: #f1c40f; }
 .dot.sld { background: #d63031; }
+.dot.wmn { background: #df1677; }
 
 
 .pay-btn { border-radius: 12px; padding: 12px; }

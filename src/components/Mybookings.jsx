@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import html2pdf from "html2pdf.js";
 
 function MyBookings() {
     const [mybookings, setmybookings] = useState([]);
@@ -10,11 +11,23 @@ function MyBookings() {
     const token = localStorage.getItem("access");
     const navigate = useNavigate();
 
+    const handleDownload = (id) => {
+        const element = document.getElementById(`ticket-${id}`);
+
+        const opt = {
+            margin: 0.3,
+            filename: `ticket-${id}.pdf`,
+            image: { type: "jpeg", quality: 1 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    };
     // Navigation logic for empty state
     function handlenavigate() {
         navigate(`/buses`);
     }
-
     // Fetch Logic
     useEffect(() => {
         const fetchData = async () => {
@@ -38,9 +51,9 @@ function MyBookings() {
     }, [token]);
 
     return (
-        <div style={{ backgroundColor: "#f4f7f6", minHeight: "100vh" }}>
+        <div style={{ backgroundColor: "#f8f1eb", minHeight: "100vh" }}>
             <Navbar />
-            
+
             <div className="container py-5">
                 {/* Header Section */}
                 <div className="text-center mb-5">
@@ -58,9 +71,9 @@ function MyBookings() {
                             </div>
                         ) : mybookings.length > 0 ? (
                             mybookings.map((booked) => (
-                                <div key={booked.id} className="position-relative mb-4">
-                                    <div 
-                                        className="card border-0 shadow-sm" 
+                                <div id={`ticket-${booked.id}`} key={booked.id} className="position-relative mb-4">
+                                    <div
+                                        className="card border-0 shadow-sm"
                                         style={{ borderRadius: "20px", overflow: "hidden", borderLeft: "8px solid #007bff" }}
                                     >
                                         <div className="card-body p-0">
@@ -73,7 +86,7 @@ function MyBookings() {
                                                         </span>
                                                         <span className="text-muted small">Booking ID: #{booked.id}</span>
                                                     </div>
-                                                    
+
                                                     <div className="d-flex align-items-center gap-3 mb-4">
                                                         <div className="p-3 bg-primary text-white rounded-circle">
                                                             <DirectionsBusIcon />
@@ -101,19 +114,20 @@ function MyBookings() {
                                                 </div>
 
                                                 {/* Ticket Stub (Right) */}
-                                                <div className="col-md-4 bg-light p-4 d-flex flex-column justify-content-center align-items-center text-center" 
-                                                     style={{ borderLeft: "2px dashed #dee2e6" }}>
+                                                <div className="col-md-4 bg-light p-4 d-flex flex-column justify-content-center align-items-center text-center"
+                                                    style={{ borderLeft: "2px dashed #dee2e6" }}>
                                                     <div className="mb-3">
                                                         <small className="text-muted d-block mb-2">Scan for Entry</small>
-                                                        <img 
-                                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=Booking-${booked.id}`} 
-                                                            alt="QR Code" 
+                                                        <img
+                                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${window.location.origin}/mybookings/${booked.id}`}
+                                                            alt="QR Code"
                                                             className="img-fluid"
                                                             style={{ mixBlendMode: "multiply" }}
                                                         />
                                                     </div>
                                                     {/* Button remains visible but currently has no function attached */}
-                                                    <button 
+                                                    <button
+                                                        onClick={() => handleDownload(booked.id)}
                                                         className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 rounded-pill px-3 fw-bold"
                                                     >
                                                         <DownloadForOfflineIcon fontSize="small" />
