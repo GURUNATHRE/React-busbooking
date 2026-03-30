@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import Registration from './components/Registration';
 import Login from './components/Login';
 import Businput from './components/Businput';

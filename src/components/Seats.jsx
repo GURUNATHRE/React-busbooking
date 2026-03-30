@@ -123,7 +123,7 @@ function Seats() {
     <>
       <Navbar />
       <div className="seats-wrapper">
-        <div className="container py-4">
+        <div className="container py-3">
           <div className="d-flex align-items-center mb-5 position-relative" style={{ marginLeft: '19%', transition: 'all 0.3s ease' }}>
             <button
               className="btn back-btn-orange shadow"
@@ -134,7 +134,7 @@ function Seats() {
             <h2 className="fw-bold text-black ms-5 m-0">Select Your Seats</h2>
           </div>
 
-          <div className="row justify-content-center g-5">
+          <div className="row justify-content-center">
             {/* LEFT COLUMN: Bus Cabin Structure */}
             <div className="col-lg-5 d-flex flex-column align-items-center">
               <div className="bus-chassis shadow-lg">
@@ -173,7 +173,7 @@ function Seats() {
               <div className="glass-card shadow-lg p-4 trip-card border-0 rounded-4 overflow-hidden"
                 style={{ background: 'rgba(255, 255, 255, 0.9)' }}>
                 <div className="d-flex align-items-center mb-4 pb-3 border-bottom border-light-subtle">
-                  <div className="icon-box text-white rounded-3 p-3 me-3 shadow-sm" style={{backgroundColor:"#da863c"}}>
+                  <div className="icon-box text-white rounded-3 p-3 me-3 shadow-sm" style={{ backgroundColor: "#da863c" }}>
                     <i className="fa-solid fa-receipt fs-4"></i>
                   </div>
                   <div>
@@ -234,7 +234,11 @@ function Seats() {
                       <p className="text-muted small fw-bold text-uppercase mb-2">Service Amenities</p>
                       <div className="d-flex flex-wrap gap-2">
                         {bus.features.split(',').map((item, index) => (
-                          <span key={index} className="badge border text-secondary fw-medium rounded-pill px-3 py-2 bg-white shadow-sm">
+                          <span
+                            key={index}
+                            className="badge border fw-medium rounded-pill px-3 py-2 shadow-sm"
+                            style={{ color: '#e4a65e', borderColor: "#000000" }}
+                          >
                             {item.trim()}
                           </span>
                         ))}

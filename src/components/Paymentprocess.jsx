@@ -5,13 +5,14 @@ import axios from "axios";
 import '../css/Paymentprocess.css';
 import {
     Box, Grid, Card, CardContent, Typography, Button,
-    TextField, MenuItem, IconButton, Container
+    TextField, MenuItem, IconButton, Container, Alert
 } from "@mui/material";
 import { BusAlert, LocalOffer, Timer } from "@mui/icons-material";
 import { Divider, Chip, Stack } from "@mui/material";
 import { Person, Badge, Transgender, Edit, CheckCircle } from "@mui/icons-material";
 import { InputAdornment, Fade } from "@mui/material";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faCakeCandles, faVenusMars, faCheckCircle, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 function Paymentprocess() {
     const { id } = useParams();
     const location = useLocation();
@@ -25,6 +26,8 @@ function Paymentprocess() {
     const [businfo, setbusinfo] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [couponInput, setCouponInput] = useState("");
+
+    const [error, setError] = useState("");
 
     // ... (Keep your existing useEffects and handleInputChange here) ...
     useEffect(() => {
@@ -68,6 +71,23 @@ function Paymentprocess() {
         const updated = [...travelers];
         updated[index][field] = value;
         setTravelers(updated);
+        // Clear error as soon as user starts filling in details
+        if (error) setError("");
+    };
+
+    const validateDetails = () => {
+        const isIncomplete = travelers.some(t => !t.name || !t.age || !t.gender);
+
+        if (isIncomplete) {
+            setError("Please enter Name, Age, and Gender for all travelers before proceeding.");
+            // Scroll to top of the card smoothly
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return false;
+        }
+
+        setError("");
+        setSubmitted(true);
+        return true;
     };
 
     const copyToClipboard = (code) => {
@@ -87,17 +107,17 @@ function Paymentprocess() {
     return (
         <>
             <Navbar />
-            <Box sx={{ bgcolor: "#f8efe8", minHeight: "100vh" }}>
-                <Container maxWidth="lg" sx={{ py: 2, height: "100%" }}>
+            <Box sx={{ bgcolor: "#f8efe8", minHeight: "100vh", overflow: "hidden" }}>
+                <Container maxWidth="lg" sx={{ py: 2, height: "100vh" }}>
                     {/* Back Button */}
                     <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start", // Change to "center" if you want the whole row centered
-                            gap: 3,                       // Adds space between the button and text
-                            mb: 4,                        // Bottom margin for the whole row
-                            px: { xs: 2, md: 0 }          // Responsive padding
+                            justifyContent: "flex-start",
+                            gap: 3,
+                            mb: 4,
+                            px: { xs: 2, md: 0 }
                         }}
                     >
                         {/* 🔙 Back Button */}
@@ -125,7 +145,7 @@ function Paymentprocess() {
                                 color: "black",
                                 letterSpacing: "-0.5px",
                                 fontSize: "2rem",
-                                lineHeight: 1 // Ensures the text aligns perfectly with the button height
+                                lineHeight: 1
                             }}
                         >
                             Check all the details
@@ -136,7 +156,7 @@ function Paymentprocess() {
                         spacing={4}
                         justifyContent="center"
                         sx={{
-                            height: "calc(100vh - 120px)" 
+                            height: "calc(100vh - 120px)"
                         }}>
                         {/* LEFT SIDE: Summaries and Forms */}
                         <Grid item xs={12} md={7}>
@@ -246,9 +266,10 @@ function Paymentprocess() {
                             )}
 
                             {/* 2️⃣ Traveler Card */}
-                            <Card sx={{ borderRadius: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.08)", border: "1px solid #f0f0f0" }}>
+                            <Card sx={{ borderRadius: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.08)", border: "1px solid #f0f0f0", position: 'relative' }}>
+
                                 <CardContent sx={{ p: 4 }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={error ? 2 : 3}>
                                         <Typography variant="h6" fontWeight="800" sx={{ color: "#2c3e50" }}>
                                             Traveler Details
                                         </Typography>
@@ -259,6 +280,29 @@ function Paymentprocess() {
                                         />
                                     </Stack>
 
+                                    {/* ✅ Inline Error Banner — replaces alert() */}
+                                    <Fade in={!!error}>
+                                        <Box sx={{ mb: error ? 2 : 0 }}>
+                                            {error && (
+                                                <Alert
+                                                    severity="warning"
+                                                    onClose={() => setError("")}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        fontWeight: 600,
+                                                        bgcolor: "#fff8f0",
+                                                        color: "#c0580a",
+                                                        border: "1px solid #f5cba7",
+                                                        "& .MuiAlert-icon": { color: "#e67e22" },
+                                                        "& .MuiAlert-action .MuiButtonBase-root": { color: "#e67e22" }
+                                                    }}
+                                                >
+                                                    {error}
+                                                </Alert>
+                                            )}
+                                        </Box>
+                                    </Fade>
+
                                     {!submitted ? (
                                         <Fade in={!submitted}>
                                             <Box>
@@ -266,33 +310,23 @@ function Paymentprocess() {
                                                     <Box
                                                         key={index}
                                                         sx={{
-                                                            mb: 3,
-                                                            p: 3,
-                                                            bgcolor: "#fff",
-                                                            border: "1px solid #e0e0e0",
-                                                            borderRadius: 3,
-                                                            position: 'relative',
-                                                            transition: "0.3s",
+                                                            mb: 3, p: 3, bgcolor: "#fff", border: "1px solid #e0e0e0",
+                                                            borderRadius: 3, position: 'relative', transition: "0.3s",
                                                             "&:hover": { borderColor: "#e67e22" }
                                                         }}
                                                     >
                                                         <Typography
                                                             variant="caption"
                                                             sx={{
-                                                                position: 'absolute',
-                                                                top: -10,
-                                                                left: 20,
-                                                                bgcolor: "#e67e22",
-                                                                color: "white",
-                                                                px: 1.5,
-                                                                borderRadius: 1,
-                                                                fontWeight: "bold"
+                                                                position: 'absolute', top: -10, left: 20, bgcolor: "#e67e22",
+                                                                color: "white", px: 1.5, borderRadius: 1, fontWeight: "bold"
                                                             }}
                                                         >
                                                             SEAT {selectedSeatNos?.[index]}
                                                         </Typography>
 
                                                         <Grid container spacing={2} mt={0.5}>
+                                                            {/* Name Input */}
                                                             <Grid item xs={12} sm={6}>
                                                                 <TextField
                                                                     fullWidth
@@ -303,12 +337,14 @@ function Paymentprocess() {
                                                                     InputProps={{
                                                                         startAdornment: (
                                                                             <InputAdornment position="start">
-                                                                                <Person sx={{ color: "#bdc3c7" }} />
+                                                                                <FontAwesomeIcon icon={faUser} style={{ color: "#bdc3c7", fontSize: '14px' }} />
                                                                             </InputAdornment>
                                                                         ),
                                                                     }}
                                                                 />
                                                             </Grid>
+
+                                                            {/* Age Input */}
                                                             <Grid item xs={6} sm={3}>
                                                                 <TextField
                                                                     fullWidth
@@ -317,10 +353,16 @@ function Paymentprocess() {
                                                                     value={traveler.age}
                                                                     onChange={(e) => handleInputChange(index, "age", e.target.value)}
                                                                     InputProps={{
-                                                                        startAdornment: <InputAdornment position="start"><Badge sx={{ color: "#bdc3c7", fontSize: 20 }} /></InputAdornment>,
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <FontAwesomeIcon icon={faCakeCandles} style={{ color: "#bdc3c7", fontSize: '14px' }} />
+                                                                            </InputAdornment>
+                                                                        ),
                                                                     }}
                                                                 />
                                                             </Grid>
+
+                                                            {/* Gender Input */}
                                                             <Grid item xs={6} sm={3}>
                                                                 <TextField
                                                                     select
@@ -329,11 +371,16 @@ function Paymentprocess() {
                                                                     value={traveler.gender}
                                                                     onChange={(e) => handleInputChange(index, "gender", e.target.value)}
                                                                     InputProps={{
-                                                                        startAdornment: <InputAdornment position="start"><Transgender sx={{ color: "#bdc3c7", fontSize: 20 }} /></InputAdornment>,
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <FontAwesomeIcon icon={faVenusMars} style={{ color: "#bdc3c7", fontSize: '14px' }} />
+                                                                            </InputAdornment>
+                                                                        ),
                                                                     }}
-                                                                    SelectProps={{ native: true }} // Faster for mobile users
+                                                                    SelectProps={{ native: true }}
                                                                 >
-                                                                    <option value="Male" >Male</option>
+                                                                    <option value="">Select</option>
+                                                                    <option value="Male">Male</option>
                                                                     <option value="Female">Female</option>
                                                                     <option value="Other">Other</option>
                                                                 </TextField>
@@ -346,14 +393,10 @@ function Paymentprocess() {
                                                     variant="contained"
                                                     fullWidth
                                                     size="large"
-                                                    onClick={() => setSubmitted(true)}
+                                                    onClick={validateDetails}
                                                     sx={{
-                                                        mt: 2,
-                                                        py: 2,
-                                                        borderRadius: 3,
-                                                        fontWeight: '800',
-                                                        bgcolor: "#e67e22",
-                                                        "&:hover": { bgcolor: "#e98731" }
+                                                        mt: 2, py: 2, borderRadius: 3, fontWeight: '800',
+                                                        bgcolor: "#e67e22", "&:hover": { bgcolor: "#e98731" }
                                                     }}
                                                 >
                                                     Review & Confirm
@@ -367,18 +410,15 @@ function Paymentprocess() {
                                                     <Box
                                                         key={i}
                                                         sx={{
-                                                            mb: 2,
-                                                            p: 2.5,
-                                                            border: "1px dashed #27ae60",
-                                                            bgcolor: "#fafffb",
-                                                            borderRadius: 3,
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center'
+                                                            mb: 2, p: 2.5,
+                                                            border: "1px dashed #e67e22",
+                                                            bgcolor: "#fff8f2",
+                                                            borderRadius: 3, display: 'flex',
+                                                            justifyContent: 'space-between', alignItems: 'center'
                                                         }}
                                                     >
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                            <CheckCircle sx={{ color: "#27ae60" }} />
+                                                            <FontAwesomeIcon icon={faCheckCircle} style={{ color: "#e67e22", fontSize: '20px' }} />
                                                             <Box>
                                                                 <Typography fontWeight="bold" sx={{ color: "#2c3e50" }}>{t.name}</Typography>
                                                                 <Typography variant="body2" color="text.secondary">
@@ -387,23 +427,21 @@ function Paymentprocess() {
                                                             </Box>
                                                         </Box>
                                                         <IconButton onClick={() => setSubmitted(false)} size="small">
-                                                            <Edit sx={{ fontSize: 18, color: "#7f8c8d" }} />
+                                                            <FontAwesomeIcon icon={faPenToSquare} style={{ fontSize: 16, color: "#7f8c8d" }} />
                                                         </IconButton>
                                                     </Box>
                                                 ))}
 
                                                 <Button
                                                     variant="contained"
-                                                    color="success"
                                                     fullWidth
                                                     size="large"
                                                     onClick={handleProceedToPayment}
                                                     sx={{
-                                                        mt: 2,
-                                                        py: 2,
-                                                        borderRadius: 3,
-                                                        fontWeight: '800',
-                                                        boxShadow: "0 6px 20px rgba(39, 174, 96, 0.3)"
+                                                        mt: 2, py: 2, borderRadius: 3, fontWeight: '800',
+                                                        bgcolor: "#e67e22",
+                                                        "&:hover": { bgcolor: "#e98731" },
+                                                        boxShadow: "0 6px 20px rgba(230, 126, 34, 0.4)"
                                                     }}
                                                 >
                                                     Proceed to Payment
@@ -507,7 +545,7 @@ function Paymentprocess() {
                             }}>
                                 <Box sx={{
                                     p: 2,
-                                    background:"#db9252",
+                                    background: "#db9252",
                                     color: "#000",
                                     display: 'flex',
                                     alignItems: 'center',
