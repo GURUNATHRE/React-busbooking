@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import { set } from "react-hook-form";
 function Seats() {
   const { id } = useParams();
 
@@ -14,13 +15,17 @@ function Seats() {
   const navigate = useNavigate();
   const [bus, setbus] = useState("");
 
+  // womens
+  const [bookingview, setbookingview] = useState("");
+
   const token = localStorage.getItem("access");
 
+  const currentUserGender = "Male";
   // particular bus 
   useEffect(() => {
     const fetchbus = async () => {
       try {
-        const response = await axios.get(`buses/${id}`, {
+        const response = await axios.get(`buses/${id}/`, {
           headers: {
             Authorization: `Token ${token}`,
             "Content-Type": "application/json",
@@ -33,6 +38,41 @@ function Seats() {
     };
     fetchbus();
   }, [id, token]);
+
+
+  // booking view for the particular bus
+  // useEffect(() => {
+  //   const fetchbookingview = async () => {
+  //     try {
+  //       const response = await axios.get(`bookings/${id}/bus/`, {
+  //         headers: {
+  //           Authorization: `Token ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+
+  //       setbookingview(response.data);
+
+  //       // ✅ CREATE SEAT MAP (seat_no → gender)
+  //       // const map = {};
+
+  //       // response.data.all_seat_assignments.forEach(item => {
+  //       //   map[item.seat.seat_no] = {
+  //       //     // ⚠️ If no travelers, fallback to Unknown
+  //       //     gender: item.travelers?.[0]?.gender || "Unknown"
+  //       //   };
+  //       // });
+
+  //       // setSeatMap(map);
+
+  //     } catch (error) {
+  //       console.error("Error fetching booking view:", error);
+  //     }
+  //   };
+
+  //   fetchbookingview();
+  // }, [id, token]);
+
 
   // seats for the bus 
   useEffect(() => {
@@ -74,6 +114,35 @@ function Seats() {
     return () => socket.close();
   }, [id]);
 
+  // womesn seat
+  // ✅ Check if adjacent seat has female
+  const isAdjacentFemale = (seatNo) => {
+    const left = seatMap[seatNo - 1];
+    const right = seatMap[seatNo + 1];
+
+    return left?.gender === "Female" || right?.gender === "Female";
+  };
+
+
+  // ✅ Decide seat border color
+  const getSeatStyle = (seatNo) => {
+    const current = seatMap[seatNo];
+    const left = seatMap[seatNo - 1];
+    const right = seatMap[seatNo + 1];
+
+    // 🔴 If current seat booked by female
+    if (current?.gender === "Female") {
+      return "border border-danger";
+    }
+
+    // 🌸 If adjacent to female
+    if (left?.gender === "Female" || right?.gender === "Female") {
+      return "border border-pink";
+    }
+
+    // ⚪ Default
+    return "border";
+  };
   // Fixed Toggle 
   const toggleSeat = (seat) => {
     if (seat.seat_book || (seat.seat_hold && !selectedSeat.some(s => s.id === seat.id))) return;
@@ -139,7 +208,7 @@ function Seats() {
             <div className="col-lg-5 d-flex flex-column align-items-center">
               <div className="bus-chassis shadow-lg">
                 <div className="bus-front">
-                  <i className="fas fa-dharmachakra steering-wheel" style={{color:"#f39e4f",paddingBottom:"20px" ,fontSize:"2rem"} }></i>
+                  <i className="fas fa-dharmachakra steering-wheel" style={{ color: "#f39e4f", paddingBottom: "20px", fontSize: "2rem" }}></i>
                 </div>
 
                 <div className="seats-grid-layout">
@@ -281,7 +350,7 @@ function Seats() {
                 <div className="legend-item"><span className="dot held-dot"></span> Hold</div>
                 <div className="legend-item"><span className="dot sld"></span> Sold</div>
                 <div className="legend-item"><span className="dot wmn"></span> Women</div>
-                
+
               </div>
             </div>
           </div>

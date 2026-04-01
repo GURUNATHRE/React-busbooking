@@ -137,21 +137,23 @@ function Businput({ onLoginClick }) {
                         maxWidth="lg"
                         sx={{
                             mt: -4,
-                            mb: 8,
+                            mb: 6,
                             display: "flex",
-                            justifyContent: "center"
+                            justifyContent: "center",
+                           
                         }}
                     >
                         <Card
                             sx={{
                                 width: "100%",
-                                maxWidth: "900px",
-                                p: { xs: 2, md: 2 },
+                                maxWidth: "95%",
+                                px:3,
+                                py:4,
                                 borderRadius: 4,
                                 boxShadow: 3
                             }}
                         >
-                            <Grid container spacing={2} alignItems="center" justifyContent="center">
+                            <Grid container spacing={5} alignItems="center" justifyContent="center" >
                                 <Grid item xs={12} sm={6} md={3}>
                                     <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary', ml: 1, mb: 1, display: 'block', }}>FROM</Typography>
                                     <Autocomplete
@@ -252,7 +254,7 @@ function Businput({ onLoginClick }) {
                     </Container>
 
                     {/* Offers... */}
-                    <Container sx={{ mb: 5 }}>
+                    <Container maxWidth="lg" sx={{ mb: 5,ml:63 }}>
                         <Stack direction="row"  alignItems="center" sx={{ mb: 4 }}>
                             <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B' ,mr:80}}>Exclusive Offers</Typography>
                             <Chip label="AVAILABLE"  variant="outlined" sx={{ fontWeight: 'bold' ,color:'#FF9933',borderColor:'#887761','&:hover': { bgcolor: "#dbdbdb",cursor:"pointer" }}} />
