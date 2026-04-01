@@ -194,7 +194,7 @@ function Login({ onClose, openRegister }) {
                   '&:hover': { bgcolor: '#f8aa61f6' }
                 }}
               >
-                {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Create Account"}
+                {isSubmitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Login Account"}
               </Button>
             </form>
 

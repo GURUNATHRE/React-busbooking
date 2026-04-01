@@ -157,6 +157,57 @@ const styles = `
     color: #d49f2d;
   }
 
+  /* Travelers summary */
+  .carddetails-travelers {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    border: 1px solid #e8edf3;
+  }
+  .carddetails-travelers-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .carddetails-traveler-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e8edf3;
+  }
+  .carddetails-traveler-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .carddetails-traveler-item:first-of-type {
+    padding-top: 0;
+  }
+  .carddetails-traveler-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .carddetails-traveler-meta {
+    font-size: 12.5px;
+    color: #64748b;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .carddetails-traveler-seat {
+    background: #eba554;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
   /* Form */
   .carddetails-field {
     margin-bottom: 16px;
@@ -290,281 +341,389 @@ const styles = `
     color: #94a3b8;
     font-weight: 500;
   }
+
+  /* Gender conflict warning */
+  .carddetails-conflict {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #c2410c;
+    font-weight: 500;
+  }
 `
+
 function Carddetails() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-    const { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId } = location.state || {};
+  const { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId } = location.state || {};
 
-    const [cardNumber, setCardNumber] = useState("");
-    const [expMonth, setExpMonth] = useState("");
-    const [expYear, setExpYear] = useState("");
-    const [cvv, setCvv] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expMonth, setExpMonth] = useState("");
+  const [expYear, setExpYear] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [genderConflicts, setGenderConflicts] = useState([]);
 
-    const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
-    const [expired, setExpired] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [expired, setExpired] = useState(false);
 
-    const socketRef = useRef(null);
-    const token = localStorage.getItem("access");
+  const socketRef = useRef(null);
+  // ✅ Unique key per payment session — prevents duplicate charges on retry
+  const idempotencyKeyRef = useRef(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `key-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+  const token = localStorage.getItem("access");
 
-    useEffect(() => {
-        if (expired) {
-            handleRestart();
-        }
-    }, [expired]);
+  useEffect(() => {
+    if (expired) {
+      handleRestart();
+    }
+  }, [expired]);
 
-    useEffect(() => {
-        const script = document.createElement("script");
-        script.src = "https://jstest.authorize.net/v1/Accept.js";
-        script.async = true;
-        document.body.appendChild(script);
-    }, []);
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://jstest.authorize.net/v1/Accept.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
-    useEffect(() => {
-        if (!busId || busId === "undefined") return;
-        const socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
-        socketRef.current = socket;
-        socket.onopen = () => console.log("WebSocket Connected ");
-        socket.onerror = (e) => console.error("WebSocket Error :", e);
-        socket.onclose = () => console.log("WebSocket Closed ");
-        return () => { if (socket.readyState === WebSocket.OPEN) socket.close(); };
-    }, [busId]);
+  useEffect(() => {
+    if (!busId || busId === "undefined") return;
+    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/bus/${busId}/seats/`);
+    socketRef.current = socket;
+    socket.onopen = () => console.log("WebSocket Connected ");
+    socket.onerror = (e) => console.error("WebSocket Error :", e);
+    socket.onclose = () => console.log("WebSocket Closed ");
+    return () => { if (socket.readyState === WebSocket.OPEN) socket.close(); };
+  }, [busId]);
 
-    useEffect(() => {
-        if (expired) return;
-        const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) { clearInterval(interval); setExpired(true); return 0; }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [expired]);
+  useEffect(() => {
+    if (expired) return;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) { clearInterval(interval); setExpired(true); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expired]);
 
-    const formatTime = (secs) => {
-        const m = Math.floor(secs / 60).toString().padStart(2, "0");
-        const s = (secs % 60).toString().padStart(2, "0");
-        return `${m}:${s}`;
-    };
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
-    const timerClass = expired ? "red" : timeLeft <= 30 ? "red" : timeLeft <= 60 ? "orange" : "green";
+  const timerClass = expired ? "red" : timeLeft <= 30 ? "red" : timeLeft <= 60 ? "orange" : "green";
 
-    const createBookingAndNotify = async () => {
-        const res = await fetch("http://127.0.0.1:8000/list/Bookingview/", {
+  // ✅ FIXED: Now sends both `seat` and `travelers` to match backend POST expectations
+  const createBookingAndNotify = async () => {
+    const res = await fetch("http://127.0.0.1:8000/list/Bookingview/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`
+      },
+      body: JSON.stringify({
+        seat: selectedSeatIds,        // list of seat IDs
+        travelers: travelers || []     // list of { name, age, gender } — one per seat
+      })
+    });
+
+    if (!res.ok) throw new Error("Booking API failed");
+    const data = await res.json();
+
+    // Show gender conflict warning if any seats were skipped
+    if (data.gender_conflict && data.gender_conflict.length > 0) {
+      setGenderConflicts(data.gender_conflict);
+    }
+
+    // Notify via WebSocket for successfully booked seats
+    const bookings = data.bookings;
+    bookings.forEach((handledata) => {
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({
+          username: handledata.user,
+          seat_id: handledata.seat.seat_no,
+          action: handledata.seat.seat_book ? "active" : "inactive"
+        }));
+      }
+    });
+
+    // If all seats had conflicts or were already booked, treat as failure
+    if (bookings.length === 0) {
+      const conflictMsg = data.gender_conflict?.length
+        ? `Seat(s) ${data.gender_conflict.join(", ")} could not be booked due to gender policy.`
+        : "Seats are no longer available.";
+      throw new Error(conflictMsg);
+    }
+
+    return bookings;
+  };
+
+  // ─── Replace only the handlePayment function in your Carddetails.jsx ───────────
+  // Everything else (styles, JSX, timer, state) stays EXACTLY the same.
+
+  const handlePayment = () => {
+    if (expired) { setMessage("Session expired. Please go back and select seats again."); return; }
+    setLoading(true);
+    setMessage("");
+    setGenderConflicts([]);
+    if (!window.Accept) { setMessage("Payment library not loaded yet. Please try again."); setLoading(false); return; }
+
+    const authData = { apiLoginID: "73PHr3Jzuea", clientKey: "3jrc454tJWSPPm8gzLG352wwKq342SegME342TCt6kQp9A476e37bqGL6sc9n6yH" };
+    const cardData = { cardNumber, month: expMonth, year: expYear, cardCode: cvv };
+
+    window.Accept.dispatchData({ authData, cardData }, async function (response) {
+      if (response.messages.resultCode === "Ok") {
+        const opaqueData = response.opaqueData;
+
+        try {
+          // ✅ Send payment + booking data together in one request
+          const payRes = await fetch("http://127.0.0.1:8000/list/api/pay/", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": `Token ${token}` },
-            body: JSON.stringify({ seat: selectedSeatIds })
-        });
-        if (!res.ok) throw new Error("Booking API failed");
-        const data = await res.json();
-        const bookings = data.bookings;
-        bookings.forEach((handledata) => {
-            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Token ${token}`,
+              "Idempotency-Key": idempotencyKeyRef.current
+            },
+            body: JSON.stringify({
+              opaquedata: opaqueData,
+              amount: finalPrice,
+              seat_ids: selectedSeatIds,   // ✅ list of seat PKs
+              travelers: travelers || [],   // ✅ [{name, age, gender}, ...]
+              bus_id: busId                 // ✅ bus PK
+            })
+          });
+
+          const payData = await payRes.json();
+
+          if (!payRes.ok) {
+            throw new Error(payData.reason || payData.status || payData.error || "Payment failed");
+          }
+
+          // ✅ Notify via WebSocket for each booking that came back
+          if (payData.bookings && payData.bookings.length > 0) {
+            payData.bookings.forEach((booking) => {
+              if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
                 socketRef.current.send(JSON.stringify({
-                    username: handledata.user,
-                    seat_id: handledata.seat.seat_no,
-                    action: handledata.seat.seat_book ? "active" : "inactive"
+                  username: booking.user,
+                  seat_id: booking.seat?.seat_no,
+                  action: booking.seat?.seat_book ? "active" : "inactive"
                 }));
-            }
-        });
-        return bookings;
-    };
+              }
+            });
+          }
 
-    const handlePayment = () => {
-        if (expired) { setMessage("Session expired. Please go back and select seats again."); return; }
-        setLoading(true);
-        setMessage("");
-        if (!window.Accept) { setMessage("Payment library not loaded yet. Please try again."); setLoading(false); return; }
+          // ✅ Show gender conflict warning if any seats were skipped
+          // (Backend can optionally return gender_conflict in the payment response)
+          if (payData.gender_conflict && payData.gender_conflict.length > 0) {
+            setGenderConflicts(payData.gender_conflict);
+          }
 
-        const authData = { apiLoginID: "73PHr3Jzuea", clientKey: "3jrc454tJWSPPm8gzLG352wwKq342SegME342TCt6kQp9A476e37bqGL6sc9n6yH" };
-        const cardData = { cardNumber, month: expMonth, year: expYear, cardCode: cvv };
+          setMessage("Booking confirmed! Redirecting...");
+          setLoading(false);
+          setTimeout(() => navigate("/mybookings"), 3000);
 
-        window.Accept.dispatchData({ authData, cardData }, async function (response) {
-            if (response.messages.resultCode === "Ok") {
-                const opaqueData = response.opaqueData;
-                try {
-                    const payRes = await fetch("http://127.0.0.1:8000/list/api/pay/", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Authorization": `Token ${token}` },
-                        body: JSON.stringify({ opaquedata: opaqueData, amount: finalPrice })
-                    });
-                    const payData = await payRes.json();
-                    if (!payRes.ok) throw new Error(payData.message || "Payment failed");
-                    await createBookingAndNotify();
-                    setMessage("Booking confirmed! Redirecting to your bookings...");
-                    setLoading(false);
-                    setTimeout(() => navigate("/mybookings"), 3000);
-                } catch (err) {
-                    setMessage("Error: " + err.message);
-                    setLoading(false);
-                }
-            } else {
-                setMessage("Payment failed: " + response.messages.message[0].text);
-                setLoading(false);
-            }
-        });
-    };
-
-    const handleRestart = () => {
-        if (busId || id) {
-            // Navigate to the dynamic bus ID route
-            navigate(`/bus/${busId}/seats`);
-             navigate(`/bus/${id}/seats`);
-        } else {
-            
-            navigate("/");
+        } catch (err) {
+          setMessage("Error: " + err.message);
+          setLoading(false);
         }
-    };
 
-    return (
-        <>
-            <style>{styles}</style>
-            <Navbar />
-            <div className="carddetails-root">
+      } else {
+        setMessage("Payment failed: " + response.messages.message[0].text);
+        setLoading(false);
+      }
+    });
+  };
 
-                {/* Back row */}
-                <div className="carddetails-back-row">
-                    <button className="carddetails-back-btn" onClick={() => navigate(-1)}>
-                        <ArrowBackIcon style={{ fontSize: 20 }} />
-                    </button>
-                    <h4 className="carddetails-title">Complete Payment</h4>
+  const handleRestart = () => {
+    if (busId || id) {
+      navigate(`/bus/${busId || id}/seats`);
+    } else {
+      navigate("/");
+    }
+  };
+
+  return (
+    <>
+      <style>{styles}</style>
+      <Navbar />
+      <div className="carddetails-root">
+
+        {/* Back row */}
+        <div className="carddetails-back-row">
+          <button className="carddetails-back-btn" onClick={() => navigate(-1)}>
+            <ArrowBackIcon style={{ fontSize: 20 }} />
+          </button>
+          <h4 className="carddetails-title">Complete Payment</h4>
+        </div>
+
+        {/* Card */}
+        <div className="carddetails-card">
+
+          {/* Header */}
+          <div className="carddetails-header">
+            <span className="carddetails-header-icon"><i className="fa-solid fa-credit-card"></i></span>
+            <span className="carddetails-header-text">Secure Payment</span>
+          </div>
+
+          {/* Timer */}
+          <div className={`carddetails-timer ${timerClass}`}>
+            {expired ? (
+              <div className="carddetails-timer-value" style={{ color: "#e74c3c", fontWeight: "bold" }}>
+                Session Expired. Redirecting...
+              </div>
+            ) : (
+              <>
+                <div className="carddetails-timer-value">
+                  <span>⏱</span>
+                  <span>{formatTime(timeLeft)}</span>
                 </div>
+                <div className="carddetails-timer-sub">Complete payment before time runs out</div>
+              </>
+            )}
+          </div>
 
-                {/* Card */}
-                <div className="carddetails-card">
-
-                    {/* Header */}
-                    <div className="carddetails-header">
-                        <span className="carddetails-header-icon"><i className="fa-solid fa-credit-card"></i></span>
-                        <span className="carddetails-header-text">Secure Payment</span>
-                    </div>
-
-                    {/* Timer */}
-                    <div className={`carddetails-timer ${timerClass}`}>
-                        {expired ? (
-                            <div className="carddetails-timer-value" style={{ color: "#e74c3c", fontWeight: "bold" }}>
-                                Session Expired. Redirecting...
-                            </div>
-
-                        ) : (
-                            <>
-                                <div className="carddetails-timer-value">
-                                    <span>⏱</span>
-                                    <span>{formatTime(timeLeft)}</span>
-                                </div>
-                                <div className="carddetails-timer-sub">Complete payment before time runs out</div>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Fare Summary */}
-                    <div className="carddetails-summary">
-                        <div className="carddetails-summary-row">
-                            <span className="carddetails-summary-label">Seat selscted :</span>
-                            <span className="carddetails-summary-value">{selectedSeatNos?.join(", ") || "—"}</span>
-                        </div>
-                        <div className="carddetails-summary-row">
-                            <span className="carddetails-summary-label">Amount to Pay</span>
-                            <span className="carddetails-summary-value amount">₹{finalPrice}</span>
-                        </div>
-                    </div>
-
-                    <div className="carddetails-divider" />
-
-                    {/* Card Number */}
-                    <div className="carddetails-field">
-                        <label className="carddetails-label">Card Number</label>
-                        <input
-                            className="carddetails-input"
-                            value={cardNumber}
-                            onChange={(e) => {
-                                setCardNumber(e.target.value);
-                            }}
-                            placeholder="1234 5678 9012 3456"
-                            disabled={expired}
-                        />
-                    </div>
-
-                    {/* Month + Year */}
-                    <div className="carddetails-row">
-                        <div className="carddetails-field">
-                            <label className="carddetails-label">Month</label>
-                            <input
-                                className="carddetails-input"
-                                value={expMonth}
-                                onChange={(e) => setExpMonth(e.target.value)}
-                                placeholder="MM"
-                                maxLength={2}
-                                disabled={expired}
-                            />
-                        </div>
-                        <div className="carddetails-field">
-                            <label className="carddetails-label">Year</label>
-                            <input
-                                className="carddetails-input"
-                                value={expYear}
-                                onChange={(e) => setExpYear(e.target.value)}
-                                placeholder="YYYY"
-                                maxLength={4}
-                                disabled={expired}
-                            />
-                        </div>
-                    </div>
-
-                    {/* CVV */}
-                    <div className="carddetails-field">
-                        <label className="carddetails-label">CVV</label>
-                        <input
-                            type="password"
-                            className="carddetails-input"
-                            value={cvv}
-                            onChange={(e) => setCvv(e.target.value)}
-                            placeholder="123"
-                            maxLength={4}
-                            disabled={expired}
-                        />
-                    </div>
-
-                    {/* Pay Button */}
-                    <button
-                        className="carddetails-pay-btn"
-                        onClick={handlePayment}
-                        disabled={loading || expired}
-                    >
-                        {loading ? "Processing..." : `Pay ₹${finalPrice}`}
-                    </button>
-
-                    {/* Expired fallback */}
-                    {expired && (
-                        <button className="carddetails-expired-btn" onClick={() => navigate(-2)}>
-                            ← Go Back & Reselect Seats
-                        </button>
-                    )}
-
-                    {/* Message */}
-                    {message && (
-                        <div className={`carddetails-message ${message.includes("confirmed") ? "success" : "error"}`}>
-                            {message}
-                        </div>
-                    )}
-
-                    {/* Trust badges */}
-                    {!expired && (
-                        <div className="carddetails-badges">
-                            <span className="carddetails-badge">🔒 SSL Secured</span>
-                            <span className="carddetails-badge">🛡️ PCI Compliant</span>
-                            <span className="carddetails-badge">✅ 256-bit Encrypted</span>
-                        </div>
-                    )}
-
-                </div>
+          {/* Fare Summary */}
+          <div className="carddetails-summary">
+            <div className="carddetails-summary-row">
+              <span className="carddetails-summary-label">Seats Selected:</span>
+              <span className="carddetails-summary-value">{selectedSeatNos?.join(", ") || "—"}</span>
             </div>
-        </>
-    );
+            <div className="carddetails-summary-row">
+              <span className="carddetails-summary-label">Amount to Pay</span>
+              <span className="carddetails-summary-value amount">₹{finalPrice}</span>
+            </div>
+          </div>
+
+          {/* ✅ Travelers Summary — shows each traveler with their seat */}
+          {travelers && travelers.length > 0 && (
+            <div className="carddetails-travelers">
+              <div className="carddetails-travelers-title">👥 Traveler Details</div>
+              {travelers.map((t, i) => (
+                <div className="carddetails-traveler-item" key={i}>
+                  <div>
+                    <div className="carddetails-traveler-name">{t.name || "—"}</div>
+                    <div className="carddetails-traveler-meta">
+                      <span>Age: {t.age || "—"}</span>
+                      <span>•</span>
+                      <span style={{ textTransform: "capitalize" }}>{t.gender || "—"}</span>
+                    </div>
+                  </div>
+                  <span className="carddetails-traveler-seat">
+                    Seat {selectedSeatNos?.[i] || i + 1}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Gender conflict warning */}
+          {genderConflicts.length > 0 && (
+            <div className="carddetails-conflict">
+              ⚠️ Seat(s) {genderConflicts.join(", ")} could not be booked — a neighboring seat is occupied by a male traveler (gender policy).
+            </div>
+          )}
+
+          <div className="carddetails-divider" />
+
+          {/* Card Number */}
+          <div className="carddetails-field">
+            <label className="carddetails-label">Card Number</label>
+            <input
+              className="carddetails-input"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(e.target.value)}
+              placeholder="1234 5678 9012 3456"
+              disabled={expired}
+            />
+          </div>
+
+          {/* Month + Year */}
+          <div className="carddetails-row">
+            <div className="carddetails-field">
+              <label className="carddetails-label">Month</label>
+              <input
+                className="carddetails-input"
+                value={expMonth}
+                onChange={(e) => setExpMonth(e.target.value)}
+                placeholder="MM"
+                maxLength={2}
+                disabled={expired}
+              />
+            </div>
+            <div className="carddetails-field">
+              <label className="carddetails-label">Year</label>
+              <input
+                className="carddetails-input"
+                value={expYear}
+                onChange={(e) => setExpYear(e.target.value)}
+                placeholder="YYYY"
+                maxLength={4}
+                disabled={expired}
+              />
+            </div>
+          </div>
+
+          {/* CVV */}
+          <div className="carddetails-field">
+            <label className="carddetails-label">CVV</label>
+            <input
+              type="password"
+              className="carddetails-input"
+              value={cvv}
+              onChange={(e) => setCvv(e.target.value)}
+              placeholder="123"
+              maxLength={4}
+              disabled={expired}
+            />
+          </div>
+
+          {/* Pay Button */}
+          <button
+            className="carddetails-pay-btn"
+            onClick={handlePayment}
+            disabled={loading || expired}
+          >
+            {loading ? "Processing..." : `Pay ₹${finalPrice}`}
+          </button>
+
+          {/* Expired fallback */}
+          {expired && (
+            <button className="carddetails-expired-btn" onClick={() => navigate(-2)}>
+              ← Go Back & Reselect Seats
+            </button>
+          )}
+
+          {/* Message */}
+          {message && (
+            <div className={`carddetails-message ${message.includes("confirmed") ? "success" : "error"}`}>
+              {message}
+            </div>
+          )}
+
+          {/* Trust badges */}
+          {!expired && (
+            <div className="carddetails-badges">
+              <span className="carddetails-badge">🔒 SSL Secured</span>
+              <span className="carddetails-badge">🛡️ PCI Compliant</span>
+              <span className="carddetails-badge">✅ 256-bit Encrypted</span>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default Carddetails;
