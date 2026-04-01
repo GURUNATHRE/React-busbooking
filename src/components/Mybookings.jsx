@@ -279,12 +279,12 @@ function MyBookings() {
                     {tab === "bookings" && (
                         bookingsLoading ? (
                             <div className="mb-spinner"><div className="mb-spinner-ring" /></div>
-                        ) : mybookings.length === 0 ? (
+                        ) : (!Array.isArray(mybookings) || mybookings.length === 0) ? (
                             <div className="mb-empty">
                                 <div className="mb-empty-icon">🎟️</div>
                                 <h3>No bookings yet</h3>
                                 <p>You haven't reserved any seats. Find a bus and book your trip!</p>
-                                <button className="mb-empty-btn" onClick={() => navigate("/buses")}>
+                                <button className="mb-empty-btn" onClick={() => navigate("/")}>
                                     Browse Buses
                                 </button>
                             </div>
