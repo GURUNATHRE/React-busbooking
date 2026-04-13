@@ -142,6 +142,10 @@ function Seats() {
     if (seat.seat_book || (seat.seat_hold && !selectedSeat.some(s => s.id === seat.id))) return;
 
     const isSelected = selectedSeat.some(s => s.id === seat.id);
+    if (!isSelected && selectedSeat.length >= 5) {  
+      alert("You can only book a maximum of 5 seats.");
+      return; 
+    }
     const newSelected = isSelected
       ? selectedSeat.filter(s => s.id !== seat.id)
       : [...selectedSeat, seat];

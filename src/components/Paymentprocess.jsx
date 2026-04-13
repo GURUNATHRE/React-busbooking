@@ -30,7 +30,7 @@ function Paymentprocess() {
 
     const [error, setError] = useState("");
 
-    // ... (Keep your existing useEffects and handleInputChange here) ...coupo
+    //Keep your existing useEffects and handleInputChange here ...coupon
     useEffect(() => {
         const fetchbus = async () => {
             try {
