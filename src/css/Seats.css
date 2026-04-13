@@ -1,6 +1,6 @@
 .seats-wrapper{
   background-color: #f8efe8;
-  height:100vh;
+  height:94vh;
 }
 .back-btn-orange {
   background-color: #ff8c00 !important;
@@ -122,4 +122,26 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease-in-out;
+}
+
+/* ===== Women Seat Reservation (RedBus-style) ===== */
+
+/* Seat booked by a female traveler — icon turns pink */
+.seat-icon.women-booked {
+  color: #df1677 !important;
+}
+
+/* Adjacent/buddy seat reserved for women — pink glowing border */
+.seat-wrapper.women-adjacent {
+  border: 2px solid #df1677;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 0 8px rgba(223, 22, 119, 0.35);
+  animation: womenPulse 2s ease-in-out infinite;
+}
+
+/* Subtle pulse animation for the reserved seat */
+@keyframes womenPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(223, 22, 119, 0.25); }
+  50%      { box-shadow: 0 0 14px rgba(223, 22, 119, 0.5); }
 }

@@ -136,8 +136,9 @@ function Businput({ onLoginClick }) {
                     <Container
                         maxWidth="lg"
                         sx={{
-                            mt: -4,
+                            mt: -6.5,
                             mb: 6,
+                            ml:73,
                             display: "flex",
                             justifyContent: "center",
                            
@@ -146,9 +147,9 @@ function Businput({ onLoginClick }) {
                         <Card
                             sx={{
                                 width: "100%",
-                                maxWidth: "95%",
+                                maxWidth: "100%",
                                 px:3,
-                                py:4,
+                                py:5,
                                 borderRadius: 4,
                                 boxShadow: 3
                             }}
@@ -254,12 +255,12 @@ function Businput({ onLoginClick }) {
                     </Container>
 
                     {/* Offers... */}
-                    <Container maxWidth="lg" sx={{ mb: 5,ml:63 }}>
+                    <Container maxWidth="lg" sx={{ mb: 5,ml:73 }}>
                         <Stack direction="row"  alignItems="center" sx={{ mb: 4 }}>
                             <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B' ,mr:80}}>Exclusive Offers</Typography>
-                            <Chip label="AVAILABLE"  variant="outlined" sx={{ fontWeight: 'bold' ,color:'#FF9933',borderColor:'#887761','&:hover': { bgcolor: "#dbdbdb",cursor:"pointer" }}} />
+                            <Chip label="AVAILABLE"  variant="outlined" sx={{ fontWeight: 'bold' ,color:'#FF9933',ml:12,borderColor:'#887761','&:hover': { bgcolor: "#dbdbdb",cursor:"pointer" }}} />
                         </Stack>
-                        <Grid container spacing={3}>
+                        <Grid container spacing={6}>
                             {[
                                 { title: "SAVE UP TO ₹250", code: "FIRSTBUS", color: "#829cc5e1", label: "First Time Users" },
                                 { title: "CASHBACK ₹150", code: "VISACARD", color: "#71b8a0e0", label: "Wallet Offer" },
@@ -279,8 +280,8 @@ function Businput({ onLoginClick }) {
                 </div>
 
                 {/* Footer... */}
-                <Box component="footer" sx={{ bgcolor: '#0F172A', color: '#94A3B8', pt: 3, pb: 4, mt: 'auto' }}>
-                    <Container>
+                <Box component="footer" sx={{ bgcolor: '#0F172A', color: '#94A3B8', pt: 3, pb: 4, mt: 'auto' ,height:'28vh'}}>
+                    <Container sx={{mt:5}}>
                         <Grid container spacing={10}>
                             <Grid item xs={12} md={3}>
                                 <Typography variant="h5" color="white" sx={{ fontWeight: 800, mb: 3, display: 'flex', alignItems: 'center',color:'#FF9933' }}>

@@ -33,6 +33,7 @@ function App() {
         <Route path="/editpass" element={<Resetpass />} />
         <Route path="/bus/:id/journeydetails" element={<Paymentprocess />} />
         <Route path="/bus/:id/journeydetails/payment" element={<Carddetails />} />
+        
       </Routes>
 
 

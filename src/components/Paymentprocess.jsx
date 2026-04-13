@@ -112,8 +112,8 @@ function Paymentprocess() {
     return (
         <>
             <Navbar />
-            <Box sx={{ bgcolor: "#f8efe8", minHeight: "100vh", overflow: "hidden" }}>
-                <Container maxWidth="lg" sx={{ py: 2, height: "100vh" }}>
+            <Box sx={{ bgcolor: "#f8efe8", overflow: "hidden" }}>
+                <Container maxWidth="lg" sx={{ py: 2, height: "90vh",mt: 5 }}>
                     {/* Back Button */}
                     <Box
                         sx={{
