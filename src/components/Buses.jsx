@@ -147,7 +147,7 @@ function Buses() {
                   paddingLeft: "50px",
                   fontSize: "1rem",
                   fontWeight: "500",
-                  width: '60vw'
+                  width: '48vw'
                 }}
               />
             </div>

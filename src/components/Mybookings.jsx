@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import html2pdf from "html2pdf.js";
-
+const frontendUrl = window.location.origin;
 /* ─── styles ─────────────────────────────────────────────────────────────── */
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -53,7 +53,7 @@ const styles = `
   .mb-bus-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
   .mb-bus-icon { background: #eba554; color: #fff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .mb-bus-name { font-size: 18px; font-weight: 800; color: #1a1a2e; margin: 0; }
-  .mb-bus-ref  { font-size: 12px; color: #94a3b8; margin: 0; }
+  .mb-bus-ref  { font-size: 20px; color: #161616; margin: 0; border: 1px solid #e8edf3; display: inline-block;  border-radius: 8px; font-weight: 600; background: #f1e2d6; }
 
   .mb-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
   .mb-info-cell { }
@@ -63,9 +63,9 @@ const styles = `
   .mb-info-cell:not(:first-child){ padding-left: 12px; }
 
   .mb-travelers-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-  .mb-traveler-chip { display: inline-flex; flex-direction: column; gap: 2px; background: #f8fafc; border: 1px solid #e8edf3; border-radius: 10px; padding: 8px 12px; margin: 4px 4px 4px 0; }
-  .mb-traveler-chip-name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
-  .mb-traveler-chip-sub  { font-size: 11px; color: #64748b; }
+  .mb-traveler-chip { display: inline-flex; flex-direction: column; gap: 2px; background: #f1eeea; border: 1px solid #e8edf3; border-radius: 10px; padding: 8px 12px; margin: 4px 4px 4px 0; }
+  .mb-traveler-chip-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+  .mb-traveler-chip-sub  { font-size: 13px; color: #64748b; }
 
   .mb-qr img { display: block; border-radius: 8px; }
   .mb-scan-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; }
@@ -141,7 +141,7 @@ function MyBookings() {
             });
             const data = await res.json();
             setMybookings(data);
-            console.log("Fetched bookings:", data);
+            // console.log("Fetched bookings:", data);
         } catch (e) {
             console.error("Bookings fetch error:", e);
         } finally {
@@ -158,7 +158,7 @@ function MyBookings() {
             });
             const data = await res.json();
             setPayments(data);
-            console.log("Fetched payments:", data);
+            // console.log("Fetched payments:", data);
         } catch (e) {
             console.error("Payments fetch error:", e);
         } finally {
@@ -210,7 +210,8 @@ function MyBookings() {
                 },
                 body: JSON.stringify({
                     transaction_id: payment.transaction_id,
-                    amount: payment.amount
+                    amount: payment.amount,
+                    booking_ids: (payment.bookings || []).map(b => b.id)
                 })
             });
             const data = await res.json();
@@ -302,8 +303,11 @@ function MyBookings() {
                                         <div className="mb-bus-row">
                                             <div className="mb-bus-icon"><DirectionsBusIcon /></div>
                                             <div>
-                                                <p className="mb-bus-name">{booked.bus}</p>
-                                                <p className="mb-bus-ref">Bus Ref: {booked.seat?.bus}</p>
+                                                <p className="mb-bus-name">{booked.bus?.bus_name}</p>
+
+                                                <p className="mb-bus-ref">
+                                                    Bus No: {booked.bus?.bus_number}
+                                                </p>
                                             </div>
                                         </div>
 
@@ -331,7 +335,7 @@ function MyBookings() {
                                             <div>
                                                 <span className="mb-travelers-title">👥 Travelers</span>
                                                 {booked.travelers.map((booked, i) => (
-                                                    <div className="mb-traveler-chip" key={i} style={{ marginLeft: "10px" }}>
+                                                    <div className="mb-traveler-chip" key={i} style={{ marginLeft: "20px" }}>
                                                         <span className="mb-traveler-chip-name">{booked.name}</span>
                                                         <span className="mb-traveler-chip-sub">Age {booked.age} · {booked.gender}</span>
                                                     </div>
@@ -352,7 +356,7 @@ function MyBookings() {
                                         <div className="mb-scan-label">Scan for Entry</div>
                                         <div className="mb-qr">
                                             <img
-                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${window.location.origin}/mybookings/${booked.id}`}
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${frontendUrl}/Bookingview/user/${booked.id}`}
                                                 alt="QR Code"
                                                 width={110}
                                                 height={110}
@@ -433,13 +437,13 @@ function MyBookings() {
                                                         {/* 1. Bus & Seat Header */}
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                <span style={{ fontSize: '18px' }}><i class="fa-solid fa-bus" style={{ color: 'rgb(219, 166, 87)' }}></i></span>
+                                                                <span style={{ fontSize: '18px' }}><i className="fa-solid fa-bus" style={{ color: 'rgb(219, 166, 87)' }}></i></span>
                                                                 <div>
                                                                     <span style={{ display: 'block', fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
-                                                                        {booking.bus}
+                                                                        {booking.bus?.bus_name}
                                                                     </span>
                                                                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
-                                                                        ID: #{booking.id} • Booked by: {booking.user}
+                                                                        Bus No: {booking.bus?.bus_number} • ID: #{booking.id} • Booked by: {booking.user}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -447,7 +451,7 @@ function MyBookings() {
                                                             {/* Prominent Seat Badge */}
                                                             <div style={{ textAlign: 'right', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '4px 10px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
                                                                 <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '800' }}>Seat</span>
-                                                                <span style={{ fontSize: '16px', fontWeight: '800', color: '#4f79bd' }}>{booking.seat.seat_no }</span>
+                                                                <span style={{ fontSize: '16px', fontWeight: '800', color: '#4f79bd' }}>{booking.seat.seat_no}</span>
                                                             </div>
                                                         </div>
 

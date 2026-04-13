@@ -16,7 +16,7 @@ function Seats() {
   const [bus, setbus] = useState("");
 
   // womens
-  const [bookingview, setbookingview] = useState("");
+  const [seatMap, setSeatMap] = useState({});
 
   const token = localStorage.getItem("access");
 
@@ -40,38 +40,33 @@ function Seats() {
   }, [id, token]);
 
 
-  // booking view for the particular bus
-  // useEffect(() => {
-  //   const fetchbookingview = async () => {
-  //     try {
-  //       const response = await axios.get(`bookings/${id}/bus/`, {
-  //         headers: {
-  //           Authorization: `Token ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
+  // booking view for the particular bus — builds seatMap for women reservation
+  useEffect(() => {
+    const fetchbookingview = async () => {
+      try {
+        const response = await axios.get(`bookings/${id}/bus/`, {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-  //       setbookingview(response.data);
+        //  CREATE SEAT MAP (seat_no → gender)
+        const map = {};
+        response.data.all_seat_assignments.forEach(item => {
+          map[item.seat.seat_no] = {
+            gender: item.travelers?.[0]?.gender || "Unknown"
+          };
+        });
+        setSeatMap(map);
 
-  //       // ✅ CREATE SEAT MAP (seat_no → gender)
-  //       // const map = {};
+      } catch (error) {
+        console.error("Error fetching booking view:", error);
+      }
+    };
 
-  //       // response.data.all_seat_assignments.forEach(item => {
-  //       //   map[item.seat.seat_no] = {
-  //       //     // ⚠️ If no travelers, fallback to Unknown
-  //       //     gender: item.travelers?.[0]?.gender || "Unknown"
-  //       //   };
-  //       // });
-
-  //       // setSeatMap(map);
-
-  //     } catch (error) {
-  //       console.error("Error fetching booking view:", error);
-  //     }
-  //   };
-
-  //   fetchbookingview();
-  // }, [id, token]);
+    fetchbookingview();
+  }, [id, token]);
 
 
   // seats for the bus 
@@ -114,34 +109,33 @@ function Seats() {
     return () => socket.close();
   }, [id]);
 
-  // womesn seat
-  // ✅ Check if adjacent seat has female
-  const isAdjacentFemale = (seatNo) => {
-    const left = seatMap[seatNo - 1];
-    const right = seatMap[seatNo + 1];
-
-    return left?.gender === "Female" || right?.gender === "Female";
+  //  Get the buddy seat number in the same pair (2-2 layout)
+  // Row of 4: positions 0,1 = left pair | positions 2,3 = right pair
+  const getBuddySeatNo = (seatNo) => {
+    const pos = (seatNo - 1) % 4; // 0,1,2,3
+    if (pos === 0) return seatNo + 1; 
+    if (pos === 1) return seatNo - 1; 
+    if (pos === 2) return seatNo + 1; 
+    return seatNo - 1;                
   };
 
-
-  // ✅ Decide seat border color
-  const getSeatStyle = (seatNo) => {
+  //  Determine the women-related CSS class for a seat icon
+  const getWomenClass = (seatNo) => {
     const current = seatMap[seatNo];
-    const left = seatMap[seatNo - 1];
-    const right = seatMap[seatNo + 1];
 
-    // 🔴 If current seat booked by female
+    //  Seat booked by a female traveler
     if (current?.gender === "Female") {
-      return "border border-danger";
+      return "women-booked";
     }
 
-    // 🌸 If adjacent to female
-    if (left?.gender === "Female" || right?.gender === "Female") {
-      return "border border-pink";
+    //  Buddy seat of a female — reserved for women (only if seat is NOT already booked)
+    const buddyNo = getBuddySeatNo(seatNo);
+    const buddy = seatMap[buddyNo];
+    if (buddy?.gender === "Female" && !current) {
+      return "women-adjacent";
     }
 
-    // ⚪ Default
-    return "border";
+    return "";
   };
   // Fixed Toggle 
   const toggleSeat = (seat) => {
@@ -191,16 +185,16 @@ function Seats() {
   return (
     <>
       <Navbar />
-      <div className="seats-wrapper">
-        <div className="container py-3">
-          <div className="d-flex align-items-center mb-5 position-relative" style={{ marginLeft: '19%', transition: 'all 0.3s ease' }}>
+      <div className="seats-wrapper py-5">
+        <div className="container py-5">
+          <div className="d-flex align-items-center mb-5 position-relative" style={{ marginLeft: '18%', transition: 'all 0.3s ease' }}>
             <button
               className="btn back-btn-orange shadow"
               onClick={() => navigate(-1)}
             >
               <i className="fas fa-arrow-left"></i>
             </button>
-            <h2 className="fw-bold text-black ms-5 m-0">Select Your Seats</h2>
+            <h2 className="fw-bold text-black ms-5 ps-3">Select Your Seats</h2>
           </div>
 
           <div className="row justify-content-center">
@@ -222,11 +216,12 @@ function Seats() {
                         {/* Adds the empty space for the aisle after 2 seats */}
                         {index % 4 === 2 && <div className="aisle-gap"></div>}
 
-                        <div className="seat-wrapper" onClick={() => toggleSeat(seat)}>
+                        <div className={`seat-wrapper ${getWomenClass(seat.seat_no)}`} onClick={() => toggleSeat(seat)}>
                           <i className={`fas fa-couch seat-icon 
             ${isBooked ? "sold" : ""} 
             ${isHeld ? "held" : ""} 
-            ${isMySelected ? "selected" : ""}`}
+            ${isMySelected ? "selected" : ""}
+            ${getWomenClass(seat.seat_no)}`}
                           ></i>
                           <span className="seat-number">{seat.seat_no}</span>
                         </div>
