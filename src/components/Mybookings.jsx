@@ -321,7 +321,7 @@ function MyBookings() {
                                             <div className="mb-info-cell">
                                                 <div className="mb-info-label">Date</div>
                                                 <div className="mb-info-value">
-                                                    {new Date(booked.booking).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                                    {new Date(booked.journey_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                                 </div>
                                             </div>
                                             <div className="mb-info-cell">

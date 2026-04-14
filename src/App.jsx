@@ -19,13 +19,7 @@ function App() {
     <>
       {/* ROUTES */}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Businput
-              onLoginClick={() => setOpenLogin(true)}
-            />
-          }
+        <Route path="/"  element={<Businput onLoginClick={() => setOpenLogin(true)} /> }
         />
         <Route path="/buses" element={<Buses />} />
         <Route path="/bus/:id/seats" element={<Seats />} />
@@ -37,25 +31,8 @@ function App() {
       </Routes>
 
 
-      {openLogin && (
-        <Login
-          onClose={() => setOpenLogin(false)}
-          openRegister={() => {
-            setOpenLogin(false);
-            setOpenRegister(true);
-          }}
-        />
-      )}
-
-      {openRegister && (
-        <Registration
-          onClose={() => setOpenRegister(false)}
-          openLogin={() => {
-            setOpenRegister(false);
-            setOpenLogin(true);
-          }}
-        />
-      )}
+      {openLogin && ( <Login onClose={() => setOpenLogin(false)} openRegister={() => {setOpenLogin(false); setOpenRegister(true); }} /> )}
+      {openRegister && (  <Registration   onClose={() => setOpenRegister(false)} openLogin={() => { setOpenRegister(false);   setOpenLogin(true);   }} />)}
     </>
   );
 }

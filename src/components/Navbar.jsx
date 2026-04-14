@@ -19,7 +19,7 @@ function Navbar({ onLoginClick }) {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const usertoken = localStorage.getItem("access");
+    const usertoken = sessionStorage.getItem("access") || localStorage.getItem("access");
 
     const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
     const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
@@ -27,6 +27,7 @@ function Navbar({ onLoginClick }) {
     const handleCloseUserMenu = () => setAnchorElUser(null);
 
     const handleLogout = () => {
+        sessionStorage.removeItem("access");
         localStorage.removeItem("access");
         handleCloseUserMenu();
         navigate('/');

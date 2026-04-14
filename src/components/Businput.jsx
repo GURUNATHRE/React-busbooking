@@ -29,7 +29,7 @@ function Businput({ onLoginClick }) {
     const [openAlert, setOpenAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState(""); // New state
 
-    const token = localStorage.getItem("access");
+    const token = sessionStorage.getItem("access") || localStorage.getItem("access");
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     function handleSearch() {
@@ -68,26 +68,29 @@ function Businput({ onLoginClick }) {
 
     const fetchBuses = async () => {
         try {
-            const response = await fetch(`${BASE_URL}buses/`, {
+            const query = new URLSearchParams({
+                starting_point: from,
+                ending_points: to,
+                date: date
+            }).toString();
+
+            const response = await fetch(`${BASE_URL}buses/?${query}`, {
                 headers: {
                     "Authorization": `Token ${token}`
                 }
             });
             if (!response.ok) throw new Error("Failed to fetch buses");
             const buses = await response.json();
-            const filteredBuses = buses.filter(
-                (bus) =>
-                    bus.starting_point.toLowerCase() === from.toLowerCase() &&
-                    bus.ending_points.toLowerCase() === to.toLowerCase()
-            );
-            if (filteredBuses.length > 0) {
-                navigate("/buses", { state: { filteredBuses } });
+            if (buses.length > 0) {
+                navigate("/buses", { state: { filteredBuses: buses, journeyDate: date, fromCity: from, toCity: to } });
             } else {
                 setOpenAlert(true);
-                setAlertMessage("No Buses Available")
+                setAlertMessage("No buses available for this route and date.")
             }
         } catch (error) {
             console.error("Error fetching data:", error);
+            setOpenAlert(true);
+            setAlertMessage("Unable to fetch buses. Please try again.");
         }
     };
 

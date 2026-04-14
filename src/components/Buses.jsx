@@ -18,8 +18,8 @@ function Buses() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get filteredBuses from the home page search state
-  const { filteredBuses } = location.state || {};
+  // Get filteredBuses and journey info from the home page search state
+  const { filteredBuses, journeyDate, fromCity, toCity } = location.state || {};
   const [seatStats, setSeatStats] = useState({ total: 0, booked: 0, available: 0 })
   const [allBuses, setAllBuses] = useState([]);
   const [filteredBusesList, setFilteredBusesList] = useState([]);
@@ -87,7 +87,8 @@ function Buses() {
     navigate(`/bus/${id}/seats`, {
       state: {
         filteredBuses: allBuses,
-        prevSearch: searchText
+        prevSearch: searchText,
+        journeyDate: journeyDate  // pass date to Seats page
       }
     });
   };
@@ -107,7 +108,7 @@ function Buses() {
         <div className="container py-4">
 
           {/* Header Section */}
-          <div className="d-flex align-items-center mb-5">
+          <div className="d-flex align-items-center mb-5 flex-wrap gap-3">
             <button
               onClick={() => navigate("/")}
               className="btn shadow-sm d-flex align-items-center justify-content-center"

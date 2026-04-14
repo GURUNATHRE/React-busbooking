@@ -360,7 +360,7 @@ function Carddetails() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId } = location.state || {};
+  const { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId, journeyDate } = location.state || {};
 
   const [cardNumber, setCardNumber] = useState("");
   const [expMonth, setExpMonth] = useState("");
@@ -380,7 +380,7 @@ function Carddetails() {
       ? crypto.randomUUID()
       : `key-${Date.now()}-${Math.random().toString(36).slice(2)}`
   );
-  const token = localStorage.getItem("access");
+  const token = sessionStorage.getItem("access") || localStorage.getItem("access");
 
   useEffect(() => {
     if (expired) {
@@ -433,8 +433,9 @@ function Carddetails() {
         "Authorization": `Token ${token}`
       },
       body: JSON.stringify({
-        seat: selectedSeatIds,        // list of seat IDs
-        travelers: travelers || []     // list of { name, age, gender } — one per seat
+        seat: selectedSeatIds,
+        travelers: travelers || [],
+        journey_date: journeyDate
       })
     });
 
@@ -446,17 +447,8 @@ function Carddetails() {
       setGenderConflicts(data.gender_conflict);
     }
 
-    // Notify via WebSocket for successfully booked seats
+    // Backend broadcasts seat updates, so the frontend does not send duplicate WebSocket messages.
     const bookings = data.bookings;
-    bookings.forEach((handledata) => {
-      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({
-          username: handledata.user,
-          seat_id: handledata.seat.seat_no,
-          action: handledata.seat.seat_book ? "active" : "inactive"
-        }));
-      }
-    });
 
     // If all seats had conflicts or were already booked, treat as failure
     if (bookings.length === 0) {
@@ -498,9 +490,10 @@ function Carddetails() {
             body: JSON.stringify({
               opaquedata: opaqueData,
               amount: finalPrice,
-              seat_ids: selectedSeatIds,   // ✅ list of seat PKs
-              travelers: travelers || [],   // ✅ [{name, age, gender}, ...]
-              bus_id: busId                 // ✅ bus PK
+              seat_ids: selectedSeatIds,
+              travelers: travelers || [],
+              bus_id: busId,
+              journey_date: journeyDate
             })
           });
 
@@ -510,17 +503,9 @@ function Carddetails() {
             throw new Error(payData.reason || payData.status || payData.error || "Payment failed");
           }
 
-          // ✅ Notify via WebSocket for each booking that came back
+          // Backend will broadcast seat updates, so the frontend does not send duplicate WebSocket messages here.
           if (payData.bookings && payData.bookings.length > 0) {
-            payData.bookings.forEach((booking) => {
-              if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-                socketRef.current.send(JSON.stringify({
-                  username: booking.user,
-                  seat_id: booking.seat?.seat_no,
-                  action: booking.seat?.seat_book ? "active" : "inactive"
-                }));
-              }
-            });
+            // leave this here for potential future logic or analytics, but do not emit seat events via WS
           }
 
           // ✅ Show gender conflict warning if any seats were skipped

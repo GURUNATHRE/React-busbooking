@@ -18,8 +18,8 @@ function Paymentprocess() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { selectedSeatIds, selectedSeatNos, Price, busId } = location.state || {};
-    const token = localStorage.getItem("access");
+    const { selectedSeatIds, selectedSeatNos, Price, busId, journeyDate } = location.state || {};
+    const token = sessionStorage.getItem("access") || localStorage.getItem("access");
 
     const [coupons, setCoupons] = useState([]);
     const [travelers, setTravelers] = useState([]);
@@ -30,7 +30,7 @@ function Paymentprocess() {
 
     const [error, setError] = useState("");
 
-    // ... (Keep your existing useEffects and handleInputChange here) ...coupo
+    //Keep your existing useEffects and handleInputChange here ...coupon
     useEffect(() => {
         const fetchbus = async () => {
             try {
@@ -105,7 +105,7 @@ function Paymentprocess() {
 
     const handleProceedToPayment = () => {
         navigate(`/bus/${id}/journeydetails/payment/`, {
-            state: { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId }
+            state: { selectedSeatIds, selectedSeatNos, travelers, Price, finalPrice, busId, journeyDate }
         });
     };
 
