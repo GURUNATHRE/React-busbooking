@@ -53,7 +53,7 @@ const styles = `
   .mb-bus-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
   .mb-bus-icon { background: #eba554; color: #fff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .mb-bus-name { font-size: 18px; font-weight: 800; color: #1a1a2e; margin: 0; }
-  .mb-bus-ref  { font-size: 20px; color: #161616; margin: 0; display: inline-block;  font-weight: 600;}
+  .mb-bus-ref  { font-size: 20px; color: #161616; margin: 0; border: 1px solid #e8edf3; display: inline-block;  border-radius: 8px; font-weight: 600; background: #f1e2d6; }
 
   .mb-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
   .mb-info-cell { }
@@ -63,7 +63,7 @@ const styles = `
   .mb-info-cell:not(:first-child){ padding-left: 12px; }
 
   .mb-travelers-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-  .mb-traveler-chip { display: inline-flex; flex-direction: column; gap: 2px; background: #ffffff; border: 1px solid #0c0c0c; border-radius: 10px; padding: 8px 12px; margin: 4px 4px 4px 0; }
+  .mb-traveler-chip { display: inline-flex; flex-direction: column; gap: 2px; background: #f1eeea; border: 1px solid #e8edf3; border-radius: 10px; padding: 8px 12px; margin: 4px 4px 4px 0; }
   .mb-traveler-chip-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
   .mb-traveler-chip-sub  { font-size: 13px; color: #64748b; }
 
@@ -94,7 +94,7 @@ const styles = `
   .mb-refund-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
   .mb-refund-btn  { background: #fff; border: 2px solid #eba554; color: #eba554; border-radius: 50px; padding: 8px 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s; }
   .mb-refund-btn:hover:not(:disabled) { background: #eba554; color: #fff; }
-  .mb-refund-btn:disabled { opacity: 2; cursor: not-allowed; }
+  .mb-refund-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .mb-refund-confirm { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 14px 18px; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .mb-refund-confirm p { margin: 0; font-size: 13px; font-weight: 600; color: #92400e; }
   .mb-refund-confirm-btns { display: flex; gap: 8px; }
@@ -128,7 +128,7 @@ function MyBookings() {
 
     // per-payment refund state:  { [paymentId]: {showing, loading, msg, ok} }
     const [refundState, setRefundState] = useState({});
- 
+
     const token = localStorage.getItem("access");
     const navigate = useNavigate();
 
@@ -295,7 +295,7 @@ function MyBookings() {
 
                                     {/* LEFT — ticket info */}
                                     <div className="mb-ticket-left">
-                                        <div className="mb-status-badge" style={booked.cancelled ? { background: '#fef2f2', color: '#dc2626' } : {}}>● {booked.cancelled ? 'Cancelled' : 'Confirmed'}</div>
+                                        <div className="mb-status-badge">● Confirmed</div>
                                         <small style={{ color: "#94a3b8", fontSize: 12, display: "block", marginBottom: 12 }}>
                                             Booking ID: #{booked.id}
                                         </small>
@@ -303,7 +303,7 @@ function MyBookings() {
                                         <div className="mb-bus-row">
                                             <div className="mb-bus-icon"><DirectionsBusIcon /></div>
                                             <div>
-                                                <p className="mb-bus-name"> Bus_Name: {booked.bus?.bus_name}</p>
+                                                <p className="mb-bus-name">{booked.bus?.bus_name}</p>
 
                                                 <p className="mb-bus-ref">
                                                     Bus No: {booked.bus?.bus_number}
@@ -319,11 +319,9 @@ function MyBookings() {
                                                 </div>
                                             </div>
                                             <div className="mb-info-cell">
-                                                <div className="mb-info-label">Journey Date</div>
+                                                <div className="mb-info-label">Date</div>
                                                 <div className="mb-info-value">
-                                                    {booked.journey_date
-                                                        ? new Date(booked.journey_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-                                                        : new Date(booked.booking).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                                    {new Date(booked.journey_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                                 </div>
                                             </div>
                                             <div className="mb-info-cell">
@@ -348,13 +346,14 @@ function MyBookings() {
                                         {/* Coupon */}
                                         {booked.coupon && (
                                             <div style={{ marginTop: 12, background: "#fef9c3", borderRadius: 10, padding: "8px 12px", fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                                                 Coupon Applied: <strong>{booked.coupon}</strong>
+                                                🎉 Coupon Applied: <strong>{booked.coupon}</strong>
                                             </div>
                                         )}
                                     </div>
-                                    {/* RIGHT — QR + download + cancel */}
+
+                                    {/* RIGHT — QR + download */}
                                     <div className="mb-ticket-right">
-                                        <div className="mb-scan-label">Scan for this QR</div>
+                                        <div className="mb-scan-label">Scan for Entry</div>
                                         <div className="mb-qr">
                                             <img
                                                 src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${frontendUrl}/Bookingview/user/${booked.id}`}
@@ -441,16 +440,16 @@ function MyBookings() {
                                                                 <span style={{ fontSize: '18px' }}><i className="fa-solid fa-bus" style={{ color: 'rgb(219, 166, 87)' }}></i></span>
                                                                 <div>
                                                                     <span style={{ display: 'block', fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
-                                                                        Bus Name :{booking.bus?.bus_name}
+                                                                        {booking.bus?.bus_name}
                                                                     </span>
-                                                                    <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+                                                                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
                                                                         Bus No: {booking.bus?.bus_number} • ID: #{booking.id} • Booked by: {booking.user}
                                                                     </span>
                                                                 </div>
                                                             </div>
 
                                                             {/* Prominent Seat Badge */}
-                                                            <div style={{ textAlign: 'center', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '4px 10px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                                                            <div style={{ textAlign: 'right', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '4px 10px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
                                                                 <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '800' }}>Seat</span>
                                                                 <span style={{ fontSize: '16px', fontWeight: '800', color: '#4f79bd' }}>{booking.seat.seat_no}</span>
                                                             </div>
@@ -465,18 +464,18 @@ function MyBookings() {
                                                             flexWrap: 'wrap',
                                                             gap: '6px'
                                                         }}>
-                                                            <span style={{ fontSize: '17px', color: '#64748b', marginRight: '4px', fontWeight: '900' }}>Passengers:</span>
+                                                            <span style={{ fontSize: '12px', color: '#64748b', marginRight: '4px', fontWeight: '600' }}>Passengers:</span>
                                                             {booking.travelers?.map((t, idx) => (
                                                                 <div key={idx} style={{
-                                                                    fontSize: '15px',
-                                                                    background: '#ffffff',
+                                                                    fontSize: '12px',
+                                                                    background: '#fff',
                                                                     padding: '2px 8px',
                                                                     borderRadius: '6px',
                                                                     border: '1px solid #e2e8f0',
                                                                     color: '#475569',
-                                                                    fontWeight: '700'
+                                                                    fontWeight: '500'
                                                                 }}>
-                                                                    {t.name} <span style={{ color: '#565f6bf1', fontSize: '10px' }}>({t.gender}, {t.age})</span>
+                                                                    {t.name} <span style={{ color: '#94a3b8', fontSize: '10px' }}>({t.gender[0]}, {t.age})</span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -521,7 +520,7 @@ function MyBookings() {
                                                 )}
                                                 {pay.status_reason && pay.status !== "captured" && pay.status !== "refunded" && (
                                                     <div style={{ fontSize: '13px', color: '#991b1b', fontWeight: '500' }}>
-                                                         {pay.status_reason}
+                                                        ⚠️ {pay.status_reason}
                                                     </div>
                                                 )}
                                             </div>
@@ -531,8 +530,8 @@ function MyBookings() {
                                         {pay.status === "captured" && pay.transaction_id && (
                                             <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px dashed #e2e8f0' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '12px', color: "#202020", fontWeight: '500' }}>
-                                                        {isRefundEligible(pay) ? (<><i className="fa-solid fa-circle-check" style={{ color: 'green' }}></i> Eligible for 24h refund</>) : (<><i className="fa-solid fa-circle-xmark" style={{ color: 'rgb(240, 80, 51)' }}></i> Refund window closed</>)}
+                                                    <span style={{ fontSize: '12px', color: "#64748b", fontWeight: '500' }}>
+                                                        {isRefundEligible(pay) ? "✓ Eligible for 24h refund" : "✕ Refund window closed"}
                                                     </span>
                                                     <button
                                                         className="mb-refund-btn"

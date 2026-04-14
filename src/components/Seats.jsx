@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../css/Seats.css";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import { set } from "react-hook-form";
 function Seats() {
   const { id } = useParams();
+  const location = useLocation();
+  const queryJourneyDate = new URLSearchParams(location.search).get("date");
+  const journeyDate = location.state?.journeyDate || queryJourneyDate;
 
   const [seats, setSeats] = useState([]);
   const socketRef = useRef(null);
@@ -18,8 +21,8 @@ function Seats() {
   // womens
   const [seatMap, setSeatMap] = useState({});
 
-  const token = localStorage.getItem("access");
-
+  const token = sessionStorage.getItem("access") || localStorage.getItem("access"); // Fallback to localStorage
+  const currentUser = sessionStorage.getItem("username") || localStorage.getItem("username") || "anonymous";
   const currentUserGender = "Male";
   // particular bus 
   useEffect(() => {
@@ -44,16 +47,16 @@ function Seats() {
   useEffect(() => {
     const fetchbookingview = async () => {
       try {
-        const response = await axios.get(`bookings/${id}/bus/`, {
+        const query = journeyDate ? `?date=${encodeURIComponent(journeyDate)}` : "";
+        const response = await axios.get(`bookings/${id}/bus/${query}`, {
           headers: {
             Authorization: `Token ${token}`,
             "Content-Type": "application/json",
           },
         });
 
-        //  CREATE SEAT MAP (seat_no → gender)
         const map = {};
-        response.data.all_seat_assignments.forEach(item => {
+        response.data.all_seat_assignments?.forEach(item => {
           map[item.seat.seat_no] = {
             gender: item.travelers?.[0]?.gender || "Unknown"
           };
@@ -66,14 +69,15 @@ function Seats() {
     };
 
     fetchbookingview();
-  }, [id, token]);
+  }, [id, token, journeyDate]);
 
 
   // seats for the bus 
   useEffect(() => {
     const fetchSeats = async () => {
       try {
-        const res = await axios.get(`bus/${id}/seats/`, {
+        const query = journeyDate ? `?date=${encodeURIComponent(journeyDate)}` : "";
+        const res = await axios.get(`bus/${id}/seats/${query}`, {
           headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
         });
         setSeats(res.data.seats);
@@ -82,7 +86,7 @@ function Seats() {
       }
     };
     fetchSeats();
-  }, [id, token]);
+  }, [id, token, journeyDate]);
 
   // WebSocket connection 
   useEffect(() => {
@@ -90,20 +94,47 @@ function Seats() {
     socketRef.current = socket;
 
     socket.onopen = () => console.log("WebSocket Connected");
+    socket.onerror = (error) => console.error("WebSocket Error:", error);
+    socket.onclose = (event) => console.log("WebSocket Closed", event.code, event.reason);
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("WebSocket message received:", data);
+      
+      // Update seats state
       setSeats(prevSeats =>
-        prevSeats.map(seat =>
-          seat.seat_no === data.seat_id
-            ? {
-              ...seat,
-              seat_book: data.action === "active" ? true : seat.seat_book,
-              seat_hold: data.action === "hold" ? true : data.action === "release" ? false : seat.seat_hold,
-            }
-            : seat
-        )
+        prevSeats.map(seat => {
+          const seatNo = Number(seat.seat_no);
+          const incomingSeatId = Number(data.seat_id);
+          if (seatNo !== incomingSeatId) return seat;
+
+          console.log(`Updating seat ${seatNo} with action: ${data.action}`);
+          switch (data.action) {
+            case "active":
+              return { ...seat, seat_book: true, seat_hold: false };
+            case "inactive":
+              return { ...seat, seat_book: false, seat_hold: false };
+            case "hold":
+              return { ...seat, seat_book: false, seat_hold: true };
+            case "release":
+              return { ...seat, seat_book: false, seat_hold: false };
+            default:
+              return seat;
+          }
+        })
       );
+
+      // Also update seatMap when seat is booked by another user
+      if (data.action === "active") {
+        setSeatMap(prevMap => ({
+          ...prevMap,
+          [data.seat_id]: {
+            gender: "Unknown", // Will be updated on next fetch if needed
+            booked: true
+          }
+        }));
+        console.log(`Seat ${data.seat_id} marked as booked by ${data.username}`);
+      }
     };
 
     return () => socket.close();
@@ -137,15 +168,26 @@ function Seats() {
 
     return "";
   };
-  // Fixed Toggle 
+  // Fixed Toggle - Select seats for current user only (no WebSocket hold)
   const toggleSeat = (seat) => {
-    if (seat.seat_book || (seat.seat_hold && !selectedSeat.some(s => s.id === seat.id))) return;
+    // Block if seat is already booked by someone
+    if (seat.seat_book) {
+      alert("This seat is already booked!");
+      return;
+    }
+
+    // Block if seat is held by someone else (during their checkout)
+    if (seat.seat_hold) {
+      alert("This seat is being checked out by another user. Please try again.");
+      return;
+    }
 
     const isSelected = selectedSeat.some(s => s.id === seat.id);
-    if (!isSelected && selectedSeat.length >= 5) {  
+    if (!isSelected && selectedSeat.length >= 5) {
       alert("You can only book a maximum of 5 seats.");
-      return; 
+      return;
     }
+
     const newSelected = isSelected
       ? selectedSeat.filter(s => s.id !== seat.id)
       : [...selectedSeat, seat];
@@ -153,12 +195,9 @@ function Seats() {
     setSelectedSeat(newSelected);
     setprice(parseFloat(bus.price || 0) * newSelected.length);
 
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({
-        seat_id: seat.seat_no,
-        action: isSelected ? "release" : "hold",
-      }));
-    }
+    // NOTE: We do NOT hold the seat on WebSocket here. 
+    // Hold will be triggered only after successful payment in journey details.
+    // This prevents blocking seats for other users until actual booking.
   };
 
   const handleProceedToPayment = () => {
@@ -167,21 +206,13 @@ function Seats() {
       return;
     }
 
-    selectedSeat.forEach(seat => {
-      if (socketRef.current?.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({
-          seat_id: seat.seat_no,
-          action: "release",
-        }));
-      }
-    });
-
     navigate(`/bus/${id}/journeydetails`, {
       state: {
         selectedSeatIds: selectedSeat.map(s => s.id),
         selectedSeatNos: selectedSeat.map(s => s.seat_no),
         Price,
         busId: id,
+        journeyDate
       }
     });
   };

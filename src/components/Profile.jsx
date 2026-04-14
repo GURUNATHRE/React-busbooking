@@ -374,7 +374,7 @@ function Carddetails() {
     const [expired, setExpired] = useState(false);
 
     const socketRef = useRef(null);
-    const token = localStorage.getItem("access");
+    const token = sessionStorage.getItem("access") || localStorage.getItem("access");
 
     useEffect(() => {
         if (expired) {
@@ -440,17 +440,8 @@ function Carddetails() {
             setGenderConflicts(data.gender_conflict);
         }
 
-        // Notify via WebSocket for successfully booked seats
+        // Backend broadcasts seat updates, so do not emit duplicate WebSocket messages from the client.
         const bookings = data.bookings;
-        bookings.forEach((handledata) => {
-            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-                socketRef.current.send(JSON.stringify({
-                    username: handledata.user,
-                    seat_id: handledata.seat.seat_no,
-                    action: handledata.seat.seat_book ? "active" : "inactive"
-                }));
-            }
-        });
 
         // If all seats had conflicts or were already booked, treat as failure
         if (bookings.length === 0) {
